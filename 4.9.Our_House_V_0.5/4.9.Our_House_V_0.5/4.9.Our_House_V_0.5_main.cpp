@@ -15,7 +15,7 @@ glm::mat4 ModelViewMatrix, ViewMatrix, ProjectionMatrix;
 
 #define TO_RADIAN 0.01745329252f  
 #define TO_DEGREE 57.295779513f
-
+//
 #include "Object_Definitions.h"
 //////////////////////////////////////////////////////////////////
 //////// Setting Cameras /////////////////////////////////////////
