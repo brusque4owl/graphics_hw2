@@ -175,6 +175,9 @@ void reshape(int width, int height) {
 	glutPostRedisplay();
 }
 
+unsigned int leftbutton_pressed = 0;
+int prevx, prevy;
+
 void timer_scene(int timestamp_scene) {
 	tiger_data.cur_frame = timestamp_scene % N_TIGER_FRAMES;
 	tiger_data.rotation_angle = (timestamp_scene % 360)*TO_RADIAN;
@@ -182,8 +185,55 @@ void timer_scene(int timestamp_scene) {
 	glutTimerFunc(100, timer_scene, (timestamp_scene + 1) % INT_MAX);
 }
 
+void mousepress(int button, int state, int x, int y) {
+	if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_DOWN)) {
+		prevx = x, prevy = y;
+		leftbutton_pressed = 1;
+		glutPostRedisplay();
+	}
+	else if ((button == GLUT_LEFT_BUTTON) && (state == GLUT_UP)) {
+		leftbutton_pressed = 0;
+		glutPostRedisplay();
+	}
+}
+
+#define CAM_ROT_SENSITIVITY 0.15f
+void motion_1(int x, int y) {
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
+
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[0].vrp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 v벡터 기준으로 360도 회전 가능
+		mat4_tmp = glm::translate(mat4_tmp, -camera[0].vrp);
+
+		camera[0].prp = glm::vec3(mat4_tmp*glm::vec4(camera[0].prp, 1.0f));
+		camera[0].vup = glm::vec3(mat4_tmp*glm::vec4(camera[0].vup, 0.0f));
+
+		vec3_tmp = glm::cross(camera[0].vup, camera[0].vrp - camera[0].prp);
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[0].vrp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, vec3_tmp);
+		mat4_tmp = glm::translate(mat4_tmp, -camera[0].vrp);
+
+		camera[0].prp = glm::vec3(mat4_tmp*glm::vec4(camera[0].prp, 1.0f));
+		camera[0].vup = glm::vec3(mat4_tmp*glm::vec4(camera[0].vup, 0.0f));
+
+		ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
+
+		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
+		glutPostRedisplay();
+	}
+}
+
 void register_callbacks(void) {
 	cc.left_button_status = GLUT_UP;
+
+	glutMouseFunc(mousepress);
+	glutMotionFunc(motion_1);
 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
@@ -212,8 +262,9 @@ void initialize_camera(void) {
 	glm::vec3(0.0f, 0.0f, 1.0f));
 */
 	// initialize the 0th camera.
-	camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);
-	camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);
+	camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
+	//camera[0].prp = glm::vec3(120.0f, 70.0f, 35.0f);
+	camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
 	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 	//u,v,n벡터를 lookAt으로 세팅
 	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
