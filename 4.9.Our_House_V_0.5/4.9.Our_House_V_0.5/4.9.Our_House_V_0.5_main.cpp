@@ -26,11 +26,10 @@ glm::mat4 ModelViewProjectionMatrix;
 
 #include "Object_Definitions.h"
 
-typedef struct _CAMERA {								// 카메라 세팅
-	glm::vec3 pos;										// 카메라 위치	
-	glm::vec3 uaxis, vaxis, naxis;						// 카메라 방향을 정하는 u,v,n벡터
-	float fov_y, aspect_ratio, near_clip, far_clip;		// field of view(시야각) / aspect_ratio : 가로 세로 비율 <- fov_y로 상하각을 정하면 비율을 통해 좌우각을 정할 수 있다.
-	int move_status;
+typedef struct {
+	// eye, viewpoint, up vector.
+	glm::vec3 prp, vrp, vup; // in this example code, make vup always equal to the v direction.
+	float fov_y, aspect_ratio, near_clip, far_clip, zoom_factor;
 } CAMERA;
 CAMERA camera[NUMBER_OF_CAMERAS];
 int camera_selected;
@@ -40,52 +39,7 @@ typedef struct _VIEWPORT {
 } VIEWPORT;
 VIEWPORT viewport[NUMBER_OF_CAMERAS];					// 뷰 포트 세팅
 
-// ViewProjectionMatrix = ProjectionMatrix * ViewMatrix
-//glm::mat4 CameraViewProjectionMatrix[NUMBER_OF_CAMERAS], CameraViewMatrix[NUMBER_OF_CAMERAS], CameraProjectionMatrix[NUMBER_OF_CAMERAS];
-// ModelViewProjectionMatrix = ProjectionMatrix * ViewMatrix * ModelMatrix
-//glm::mat4 CameraModelViewProjectionMatrix; // This one is sent to vertex shader when it is ready.
-
-
-/*
-[0][1][2][3]
-[x] ux uy uz 0
-[y] vx vy vz 0
-[z] nx ny nz 0
-[w]  0  0  0 1
-*/
-void set_ViewMatrix_from_camera_frame(int cam_index) {
-	ViewMatrix[cam_index] = glm::mat4(1.0f);
-	ViewMatrix[cam_index][0].x = camera[cam_index].uaxis.x;
-	ViewMatrix[cam_index][0].y = camera[cam_index].vaxis.x;
-	ViewMatrix[cam_index][0].z = camera[cam_index].naxis.x;
-
-	ViewMatrix[cam_index][1].x = camera[cam_index].uaxis.y;
-	ViewMatrix[cam_index][1].y = camera[cam_index].vaxis.y;
-	ViewMatrix[cam_index][1].z = camera[cam_index].naxis.y;
-
-	ViewMatrix[cam_index][2].x = camera[cam_index].uaxis.z;
-	ViewMatrix[cam_index][2].y = camera[cam_index].vaxis.z;
-	ViewMatrix[cam_index][2].z = camera[cam_index].naxis.z;
-
-	ViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], -camera[cam_index].pos);	// 카메라를 WC의 원점으로 평행이동 한 후에 로테이션
-}
-
 //카메라 기준점 pos(vec3타입)을 옮김. 카메라를 axis를 축을 기준으로 del에 비례하여 이동시켜라.
-void renew_cam_position_along_axis(int cam_index, float del, glm::vec3 trans_axis) {
-	camera[cam_index].pos += CAM_TRANSLATION_SPEED * del*trans_axis;
-}
-
-//	 pos   ->     pos'
-// (x,y,z) = (x,y,z) + alpha*(nx,ny,nz)
-void renew_cam_orientation_rotation_around_axis(int cam_index, float angle, glm::vec3 rot_axis) {
-	glm::mat3 RotationMatrix;
-
-	RotationMatrix = glm::mat3(glm::rotate(glm::mat4(1.0f), CAM_ROTATION_SPEED*TO_RADIAN*angle, rot_axis));	// axis축 둘레로 angle만큼 회전
-
-	camera[cam_index].uaxis = RotationMatrix * camera[cam_index].uaxis;	// 카메라 축 각각을 회전시킴(벡터의 끝 꼭지점을 회전시켜도 같음)
-	camera[cam_index].vaxis = RotationMatrix * camera[cam_index].vaxis;
-	camera[cam_index].naxis = RotationMatrix * camera[cam_index].naxis;
-}
 
 //////////////////////////////////////////////////////////////////
 /////// End of Setting Cameras ///////////////////////////////////
@@ -208,7 +162,7 @@ void reshape(int width, int height) {
 void reshape(int width, int height) {
 	camera[0].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
 	viewport[0].x = viewport[0].y = 0;
-	viewport[0].w = (int)(0.70f*width); viewport[0].h = (int)(0.70f*height);
+	viewport[0].w = width; viewport[0].h = height;
 	ProjectionMatrix[0] = glm::perspective(camera[0].fov_y*TO_RADIAN, camera[0].aspect_ratio, camera[0].near_clip, camera[0].far_clip);
 	ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
 
@@ -252,46 +206,47 @@ void prepare_shader_program(void) {
 }
 
 void initialize_camera(void) {
-	// called only once when the OpenGL system is initialized!!!
-	// only ViewMatrix[*] are set up in this function.
-	// ProjectionMatrix will be initialized in the reshape callback function when the window pops up.
-	/* 주어진 카메라
-	ViewMatrix[0] = glm::lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
+
+/*	주어진 lootAt함수 파라미터
+	lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
 	glm::vec3(0.0f, 0.0f, 1.0f));
-	*/
-	// Camera 0
-	//camera[0].pos = glm::vec3(25.0f, 0.5f, 0.0f);
-	//camera[0].pos = glm::vec3(125.0f, 0.5f, 0.0f); // 시작하자마자 호랑이 보임
-	camera[0].pos = glm::vec3(300.0f, 400.0f, 300.0f);  // ->는 z축 / ^위는 y축
-	camera[0].uaxis = glm::vec3(-1.0f, 0.0f, 0.0f);
-	camera[0].vaxis = glm::vec3(0.0f, -1.0f, 0.0f);
-	camera[0].naxis = glm::vec3(0.0f, 0.0f, 1.0f);
-	
+*/
+	// initialize the 0th camera.
+	camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);
+	camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);
+	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+	//u,v,n벡터를 lookAt으로 세팅
+	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
+	//camera[0].vup = glm::vec3(ViewMatrix[0][0].y, ViewMatrix[0][1].y, ViewMatrix[0][2].y); // in this example code, make vup always equal to the v direction.
 
-	// perspective projection에 사용되는 정보
-	camera[0].move_status = 0;
-	camera[0].fov_y = 130.0f;		// field of view : 카메라 상하각도가 30도(중앙을 기준으로 위아래 각각 15도) -> 물체를 확대해서 보려면 각도를 좁히면 됨(망원렌즈)
-	camera[0].aspect_ratio = 1.0f; // will be set when the viewing window pops up.(reshape()내에서 다시 지정해줌)
-	camera[0].near_clip = 0.01f;
-	camera[0].far_clip = 500.0f;
+#ifdef PRINT_DEBUG_INFO 
+	print_mat4("Cam 0", ViewMatrix[0]);
+#endif
+//	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
 
-	set_ViewMatrix_from_camera_frame(0);
+	camera[0].fov_y = 15.0f;
+	camera[0].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[0].near_clip = 1.0f;
+	camera[0].far_clip = 10000.0f;
+	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
-	//Camera 1
-	camera[1].pos = glm::vec3(0.0f, 50.0f, 0.0f);
-	camera[1].uaxis = glm::vec3(0.0f, 0.0f, -1.0f);
-	camera[1].vaxis = glm::vec3(-1.0f, 0.0f, 0.0f);
-	camera[1].naxis = glm::vec3(0.0f, 1.0f, 0.0f);
+//initialize the 1st camera.
+	camera[1].prp = glm::vec3(0.0f, 50.0f, 0.0f);
+	camera[1].vrp = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera[1].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+	ViewMatrix[1] = glm::lookAt(camera[1].prp, camera[1].vrp, camera[1].vup);
+	camera[1].vup = glm::vec3(ViewMatrix[1][0].y, ViewMatrix[1][1].y, ViewMatrix[1][2].y); // in this example code, make vup always equal to the v direction.
 
-	camera[1].move_status = 0;
-	camera[1].fov_y = 15.0f;
-	camera[1].aspect_ratio = 1.0f; // will be set when the viewing window pops up.
-	camera[1].near_clip = 0.01f;
-	camera[1].far_clip = 500.0f;
+#ifdef PRINT_DEBUG_INFO 
+	print_mat4("Cam 1", ViewMatrix[1]);
+#endif
 
-	set_ViewMatrix_from_camera_frame(1);
+	camera[1].fov_y = 16.0f;
+	camera[1].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[1].near_clip = 0.1f;
+	camera[1].far_clip = 100.0f;
+	camera[1].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
-	camera_selected = 0;
 }
 
 void initialize_OpenGL(void) {
