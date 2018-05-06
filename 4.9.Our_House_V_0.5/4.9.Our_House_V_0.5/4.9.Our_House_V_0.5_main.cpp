@@ -89,6 +89,12 @@ void renew_cam_orientation_rotation_around_axis(int cam_index, float angle, glm:
 /////// End of Setting Cameras ///////////////////////////////////
 //////////////////////////////////////////////////////////////////
 
+typedef struct _CALLBACK_CONTEXT {
+	int left_button_status;
+	int prevx, prevy;
+} CALLBACK_CONTEXT;
+CALLBACK_CONTEXT cc;
+
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	 
@@ -122,6 +128,8 @@ void display(void) {
 
 	glutSwapBuffers();
 }
+
+void initialize_camera(void);
 
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
@@ -197,6 +205,8 @@ void timer_scene(int timestamp_scene) {
 }
 
 void register_callbacks(void) {
+	cc.left_button_status = GLUT_UP;
+
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutReshapeFunc(reshape);
@@ -217,7 +227,46 @@ void prepare_shader_program(void) {
 	loc_primitive_color = glGetUniformLocation(h_ShaderProgram, "u_primitive_color");
 }
 
+void initialize_camera(void) {
+	// called only once when the OpenGL system is initialized!!!
+	// only ViewMatrix[*] are set up in this function.
+	// ProjectionMatrix will be initialized in the reshape callback function when the window pops up.
+
+	// Camera 0
+	camera[0].pos = glm::vec3(25.0f, 0.5f, 0.0f);
+	camera[0].uaxis = glm::vec3(0.0f, 0.0f, -1.0f);
+	camera[0].vaxis = glm::vec3(0.0f, 1.0f, 0.0f);
+	camera[0].naxis = glm::vec3(1.0f, 0.0f, 0.0f);
+
+	// perspective projection에 사용되는 정보
+	camera[0].move_status = 0;
+	camera[0].fov_y = 30.0f;		// field of view : 카메라 상하각도가 30도(중앙을 기준으로 위아래 각각 15도) -> 물체를 확대해서 보려면 각도를 좁히면 됨(망원렌즈)
+	camera[0].aspect_ratio = 1.0f; // will be set when the viewing window pops up.(reshape()내에서 다시 지정해줌)
+	camera[0].near_clip = 0.01f;
+	camera[0].far_clip = 500.0f;
+
+	set_ViewMatrix_from_camera_frame(0);
+
+	//Camera 1
+	camera[1].pos = glm::vec3(0.0f, 50.0f, 0.0f);
+	camera[1].uaxis = glm::vec3(0.0f, 0.0f, -1.0f);
+	camera[1].vaxis = glm::vec3(-1.0f, 0.0f, 0.0f);
+	camera[1].naxis = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	camera[1].move_status = 0;
+	camera[1].fov_y = 15.0f;
+	camera[1].aspect_ratio = 1.0f; // will be set when the viewing window pops up.
+	camera[1].near_clip = 0.01f;
+	camera[1].far_clip = 500.0f;
+
+	set_ViewMatrix_from_camera_frame(1);
+
+	camera_selected = 0;
+}
+
 void initialize_OpenGL(void) {
+	initialize_camera();		// openGL시작하면서 카메라 세팅
+
 	glEnable(GL_DEPTH_TEST); // Default state
 	 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
