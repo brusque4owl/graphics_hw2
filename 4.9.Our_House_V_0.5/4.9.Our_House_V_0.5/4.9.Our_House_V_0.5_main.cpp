@@ -206,7 +206,7 @@ void prepare_shader_program(void) {
 }
 
 void initialize_camera(void) {
-
+// example 4.5.3을 이용하여 camera세팅
 /*	주어진 lootAt함수 파라미터
 	lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
 	glm::vec3(0.0f, 0.0f, 1.0f));
@@ -230,6 +230,7 @@ void initialize_camera(void) {
 	camera[0].far_clip = 10000.0f;
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
+	/*
 //initialize the 1st camera.
 	camera[1].prp = glm::vec3(0.0f, 50.0f, 0.0f);
 	camera[1].vrp = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -246,7 +247,7 @@ void initialize_camera(void) {
 	camera[1].near_clip = 0.1f;
 	camera[1].far_clip = 100.0f;
 	camera[1].zoom_factor = 1.0f; // will be used for zoomming in and out.
-
+	*/
 }
 
 void initialize_OpenGL(void) {
@@ -265,7 +266,7 @@ void initialize_OpenGL(void) {
 		ViewMatrix[0] = glm::lookAt(glm::vec3(800.0f, 90.0f, 25.0f), glm::vec3(0.0f, 90.0f, 25.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f));
 	}
-	/*
+	/* Used in initialize_camera()
 	if (1) {
 		ViewMatrix[0] = glm::lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f));
