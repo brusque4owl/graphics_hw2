@@ -94,15 +94,13 @@ typedef struct _CALLBACK_CONTEXT {
 	int prevx, prevy;
 } CALLBACK_CONTEXT;
 CALLBACK_CONTEXT cc;
+void display_camera(int camera_index){
 
-void display(void) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	 
 	glLineWidth(2.0f);
 	draw_axes();
 	glLineWidth(1.0f);
- 
-    draw_static_object(&(static_objects[OBJ_BUILDING]), 0);
+
+	draw_static_object(&(static_objects[OBJ_BUILDING]), 0);
 
 	draw_static_object(&(static_objects[OBJ_TABLE]), 0);
 	draw_static_object(&(static_objects[OBJ_TABLE]), 1);	// takes given teapot
@@ -126,6 +124,10 @@ void display(void) {
 
 	draw_animated_tiger();
 
+}
+void display(void) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	display_camera(0);
 	glutSwapBuffers();
 }
 
