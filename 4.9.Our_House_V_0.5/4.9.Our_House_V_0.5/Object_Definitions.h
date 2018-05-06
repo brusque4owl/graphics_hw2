@@ -381,13 +381,12 @@ void define_static_objects(void) {
 void draw_static_object(Object *obj_ptr, int instance_ID) {
 	glFrontFace(obj_ptr->front_face_mode);
 
-	ModelViewMatrix = ViewMatrix * obj_ptr->ModelMatrix[instance_ID];
-	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
+	ModelViewMatrix[0] = ViewMatrix[0] * obj_ptr->ModelMatrix[instance_ID];
+	ModelViewProjectionMatrix = ProjectionMatrix[0] * ModelViewMatrix[0];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
 	glUniform3f(loc_primitive_color, obj_ptr->material[instance_ID].diffuse.r,
 		obj_ptr->material[instance_ID].diffuse.g, obj_ptr->material[instance_ID].diffuse.b);		// rgb coloring
-
 	glBindVertexArray(obj_ptr->VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3 * obj_ptr->n_triangles);
 	glBindVertexArray(0);
@@ -420,8 +419,8 @@ void define_axes(void) {
 
 #define WC_AXIS_LENGTH		60.0f
 void draw_axes(void) {
-	ModelViewMatrix = glm::scale(ViewMatrix, glm::vec3(WC_AXIS_LENGTH, WC_AXIS_LENGTH, WC_AXIS_LENGTH));
-	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
+	ModelViewMatrix[0] = glm::scale(ViewMatrix[0], glm::vec3(WC_AXIS_LENGTH, WC_AXIS_LENGTH, WC_AXIS_LENGTH));
+	ModelViewProjectionMatrix = ProjectionMatrix[0] * ModelViewMatrix[0];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
 	glBindVertexArray(VAO_axes);
@@ -462,11 +461,11 @@ void define_animated_tiger(void) {
 }
 
 void draw_animated_tiger(void) {
-	ModelViewMatrix = glm::rotate(ViewMatrix, -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
- 	ModelViewMatrix = glm::translate(ModelViewMatrix, glm::vec3(100.0f, 0.0f, 0.0f));
- 	ModelViewMatrix *= tiger[tiger_data.cur_frame].ModelMatrix[0];
+	ModelViewMatrix[0] = glm::rotate(ViewMatrix[0], -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+ 	ModelViewMatrix[0] = glm::translate(ModelViewMatrix[0], glm::vec3(100.0f, 0.0f, 0.0f));
+ 	ModelViewMatrix[0] *= tiger[tiger_data.cur_frame].ModelMatrix[0];
 
-	ModelViewProjectionMatrix = ProjectionMatrix * ModelViewMatrix;
+	ModelViewProjectionMatrix = ProjectionMatrix[0] * ModelViewMatrix[0];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
 	glUniform3f(loc_primitive_color, tiger[tiger_data.cur_frame].material[0].diffuse.r,
