@@ -91,6 +91,12 @@ void display(void) {
 }
 
 void initialize_camera(void);
+void motion_translate_xaxis(int x, int y);
+void motion_translate_yaxis(int x, int y);
+void motion_translate_zaxis(int x, int y);
+void motion_rotate_xaxis(int x, int y);
+void motion_rotate_yaxis(int x, int y);
+void motion_rotate_zaxis(int x, int y);
 
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
@@ -100,21 +106,27 @@ void keyboard(unsigned char key, int x, int y) {
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
 	case 'r':					// Translation for x axis
+		glutMotionFunc(motion_translate_xaxis);
 		glutPostRedisplay();
 		break;
 	case 'g':					// Translation for y axis
+		glutMotionFunc(motion_translate_xaxis);
 		glutPostRedisplay();
 		break;
 	case 'b':					// Translation for z axis
+		glutMotionFunc(motion_translate_xaxis);
 		glutPostRedisplay();
 		break;
 	case 'x':					// Rotation for x axis
+		glutMotionFunc(motion_rotate_xaxis);
 		glutPostRedisplay();
 		break;
 	case 'y':					// Rotation for y axis
+		glutMotionFunc(motion_rotate_yaxis);
 		glutPostRedisplay();
 		break;
 	case 'z':					// Rotation for z axis
+		glutMotionFunc(motion_rotate_zaxis);
 		glutPostRedisplay();
 		break;
 	case 'i':					// Zoom in
@@ -271,16 +283,55 @@ void motion_1(int x, int y) {
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 v벡터 기준으로 360도 회전 가능
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
 
-		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));
-		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
-		vec3_tmp = glm::cross(camera[camera_selected].vup, camera[camera_selected].vrp - camera[camera_selected].prp);
+		
+		vec3_tmp = glm::cross(camera[camera_selected].vup, camera[camera_selected].vrp - camera[camera_selected].prp);		// vrp-prp = -n vector   // result of cross is -u vector
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
-		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, vec3_tmp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, vec3_tmp);	// rotate for -u vector
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
 
 		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));
 		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));
+		
+
+		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+
+		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
+		glutPostRedisplay();
+	}
+}
+void motion_translate_xaxis(int x, int y) {
+	glutPostRedisplay();
+}
+void motion_translate_yaxis(int x, int y) {
+	glutPostRedisplay();
+}
+void motion_translate_zaxis(int x, int y) {
+	glutPostRedisplay();
+}
+void motion_rotate_xaxis(int x, int y) {
+	glutPostRedisplay();
+}
+void motion_rotate_yaxis(int x, int y) {
+	glutPostRedisplay();
+}
+void motion_rotate_zaxis(int x, int y) {
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
+
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 v벡터 기준으로 360도 회전 가능
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
+
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
 		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
