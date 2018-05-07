@@ -315,11 +315,11 @@ void motion_translate_naxis(int x, int y) {
 void motion_rotate_uaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
-	float delx, dely;
+	float dely;
 
 	if (leftbutton_pressed) {
-		delx = (float)(x - prevx), dely = -(float)(y - prevy);
-		prevx = x, prevy = y;
+		dely = -(float)(y - prevy);
+		prevy = y;
 
 		// prp-vrp = n벡터 // vup X n = u벡터   <- 이 모든건 카메라 축 기준
 		vec3_tmp = glm::cross(camera[camera_selected].vup, camera[camera_selected].prp - camera[camera_selected].vrp);
@@ -339,15 +339,15 @@ void motion_rotate_uaxis(int x, int y) {
 void motion_rotate_vaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
-	float delx, dely;
+	float delx;
 
 	if (leftbutton_pressed) {
-		delx = (float)(x - prevx), dely = -(float)(y - prevy);
-		prevx = x, prevy = y;
+		delx = (float)(x - prevx);
+		prevx = x;
 		// prp를 원점으로 만든 뒤, 원하는만큼 회전 시키고, 다시 돌아옴. 이 변환에 대해서는 vrp(뷰 참조점, 카메라가 볼 곳)와 up vector만 적용됨.
 		// prp는 고정되어 있어야하기 때문(up vector도 자기 자리에서 vrp따라 회전해 주어야함)
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
-		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*-delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 vup벡터 기준으로 360도 회전 가능
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*-delx*TO_RADIAN, camera[camera_selected].vup);	//좌우움직이면 vup벡터 기준으로 360도 회전 가능
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
@@ -362,11 +362,11 @@ void motion_rotate_vaxis(int x, int y) {
 void motion_rotate_naxis(int x, int y) {
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
-	float delx, dely;
+	float delx;
 
 	if (leftbutton_pressed) {
-		delx = (float)(x - prevx), dely = -(float)(y - prevy);
-		prevx = x, prevy = y;
+		delx = (float)(x - prevx);
+		prevx = x;
 
 		vec3_tmp = camera[camera_selected].prp - camera[camera_selected].vrp;			// prp-vrp = n벡터  <- 이 모든건 카메라 축 기준
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
@@ -413,7 +413,7 @@ void initialize_camera(void) {
 // example 4.5.3을 이용하여 camera세팅
 /*	주어진 lootAt함수 파라미터
 	lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
-	glm::vec3(0.0f, 0.0f, 1.0f));
+	glm::vec3(0.0f, 0.0f, 1.0f));	// 각각 PRP, VRP, VUP
 */
 	// initialize the 0th camera.
 	camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치

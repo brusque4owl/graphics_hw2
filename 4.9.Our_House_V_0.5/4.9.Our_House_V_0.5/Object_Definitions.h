@@ -204,7 +204,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_LIGHT].material[4].exponent = 128.0f*0.4f;
 
 // Added OBJ_LIGHT NO.5 - HK
-	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::translate(glm::mat4(1.0f), glm::vec3(70.0f, 100.0f, 49.0));
+	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::translate(glm::mat4(1.0f), glm::vec3(70.0f, 100.0f, 49.0f));
 	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::rotate(static_objects[OBJ_LIGHT].ModelMatrix[5],
 		90.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -235,7 +235,7 @@ void define_static_objects(void) {
 
 // Added OBJ_TEAPOT NO.1 - HK
 	//vec3(157.0f, 76.5f, 0.0f) - OBJ_TABLE NO.1
-	static_objects[OBJ_TEAPOT].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(35.0f, 32.0f, 13.0f));
+	static_objects[OBJ_TEAPOT].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(35.0f, 50.0f, 12.0f));
 	static_objects[OBJ_TEAPOT].ModelMatrix[1] = glm::scale(static_objects[OBJ_TEAPOT].ModelMatrix[1],
 		glm::vec3(2.0f, 2.0f, 2.0f));
 
@@ -267,7 +267,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_NEW_CHAIR].material[0].exponent = 128.0f*0.078125f;
 
 // Added OBJ_NEW_CHAIR NO.1 - HK
-	static_objects[OBJ_NEW_CHAIR].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 30.0f, 0.0f));
+	static_objects[OBJ_NEW_CHAIR].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 52.0f, 0.0f));
 	static_objects[OBJ_NEW_CHAIR].ModelMatrix[1] = glm::scale(static_objects[OBJ_NEW_CHAIR].ModelMatrix[1],
 		glm::vec3(1.2f, 1.2f, 1.2f));
 	static_objects[OBJ_NEW_CHAIR].ModelMatrix[1] = glm::rotate(static_objects[OBJ_NEW_CHAIR].ModelMatrix[1],
@@ -301,7 +301,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_FRAME].material[0].exponent = 128.0f*0.1f;
 
 // Added OBJ_FRAME NO.1 - HK
-	static_objects[OBJ_FRAME].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 15.0f, 30.0f));
+	static_objects[OBJ_FRAME].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 20.0f, 30.0f));
 	static_objects[OBJ_FRAME].ModelMatrix[1] = glm::scale(static_objects[OBJ_FRAME].ModelMatrix[1],
 		glm::vec3(0.6f, 0.6f, 0.6f));
 	static_objects[OBJ_FRAME].ModelMatrix[1] = glm::rotate(static_objects[OBJ_FRAME].ModelMatrix[1],
@@ -338,7 +338,7 @@ void define_static_objects(void) {
 
 // Added OBJ_NEW_PICTURE NO.1 - HK
 	// OBJ_FRAME 1 - (25.0f, 15.0f, 30.0f)
-	static_objects[OBJ_NEW_PICTURE].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(26.5f, 15.0f, 30.0f));
+	static_objects[OBJ_NEW_PICTURE].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(26.5f, 20.0f, 30.0f));
 	static_objects[OBJ_NEW_PICTURE].ModelMatrix[1] = glm::scale(static_objects[OBJ_NEW_PICTURE].ModelMatrix[1],
 		glm::vec3(13.5f*0.6f, 13.5f*0.6f, 13.5f*0.6f));
 	static_objects[OBJ_NEW_PICTURE].ModelMatrix[1] = glm::rotate(static_objects[OBJ_NEW_PICTURE].ModelMatrix[1],
