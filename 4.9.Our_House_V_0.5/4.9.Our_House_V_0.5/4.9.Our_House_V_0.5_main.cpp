@@ -313,7 +313,28 @@ void motion_translate_naxis(int x, int y) {
 }
 
 void motion_rotate_uaxis(int x, int y) {
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
 
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		// prp-vrp = n벡터 // vup X n = u벡터   <- 이 모든건 카메라 축 기준
+		vec3_tmp = glm::cross(camera[camera_selected].vup, camera[camera_selected].prp - camera[camera_selected].vrp);
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, vec3_tmp);		// u벡터(카메라의 오른쪽)를 둘레로 회전 : 양의 각도로 회전 시, 카메라가 고개를 쳐드니까 화면은 아래로 내려감
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
+
+		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+
+		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		glutPostRedisplay();
+	}
 }
 void motion_rotate_vaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
@@ -326,7 +347,7 @@ void motion_rotate_vaxis(int x, int y) {
 		// prp를 원점으로 만든 뒤, 원하는만큼 회전 시키고, 다시 돌아옴. 이 변환에 대해서는 vrp(뷰 참조점, 카메라가 볼 곳)와 up vector만 적용됨.
 		// prp는 고정되어 있어야하기 때문(up vector도 자기 자리에서 vrp따라 회전해 주어야함)
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
-		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 v벡터 기준으로 360도 회전 가능
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 vup벡터 기준으로 360도 회전 가능
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
@@ -334,7 +355,7 @@ void motion_rotate_vaxis(int x, int y) {
 
 		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
-		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		glutPostRedisplay();
 	}
 }
