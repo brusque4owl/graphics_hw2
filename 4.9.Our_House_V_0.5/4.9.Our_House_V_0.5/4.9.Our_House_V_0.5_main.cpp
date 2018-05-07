@@ -23,9 +23,6 @@ GLint loc_ModelViewProjectionMatrix, loc_primitive_color; // indices of uniform 
 glm::mat4 ViewProjectionMatrix[NUMBER_OF_CAMERAS], ViewMatrix[NUMBER_OF_CAMERAS], ProjectionMatrix[NUMBER_OF_CAMERAS];
 glm::mat4 ModelViewMatrix[NUMBER_OF_CAMERAS];
 glm::mat4 ModelViewProjectionMatrix;
-
-#include "Object_Definitions.h"
-
 typedef struct {
 	// eye, viewpoint, up vector.
 	glm::vec3 prp, vrp, vup; // in this example code, make vup always equal to the v direction.
@@ -33,6 +30,8 @@ typedef struct {
 } CAMERA;
 CAMERA camera[NUMBER_OF_CAMERAS];
 int camera_selected;
+
+#include "Object_Definitions.h"
 
 typedef struct _VIEWPORT {
 	int x, y, w, h;
@@ -100,6 +99,67 @@ void keyboard(unsigned char key, int x, int y) {
 	case 27: // ESC key
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
+	case 'r':					// Translation for x axis
+		glutPostRedisplay();
+		break;
+	case 'g':					// Translation for y axis
+		glutPostRedisplay();
+		break;
+	case 'b':					// Translation for z axis
+		glutPostRedisplay();
+		break;
+	case 'x':					// Rotation for x axis
+		glutPostRedisplay();
+		break;
+	case 'y':					// Rotation for y axis
+		glutPostRedisplay();
+		break;
+	case 'z':					// Rotation for z axis
+		glutPostRedisplay();
+		break;
+	case 'i':					// Zoom in
+		camera[camera_selected].fov_y = camera[camera_selected].fov_y - camera[camera_selected].zoom_factor;
+		if (camera[camera_selected].fov_y <= 0.0f) // fov_y가 0이 되면 화면에 아무것도 안보임, 이후 화면 뒤집힘
+			camera[camera_selected].fov_y = 1.0f;
+		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, 
+																camera[camera_selected].near_clip, camera[camera_selected].far_clip);
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		//printf("%f\n", camera[camera_selected].fov_y);
+		glutPostRedisplay();
+		break;
+	case 'o':					// Zoom out
+		camera[camera_selected].fov_y = camera[camera_selected].fov_y + camera[camera_selected].zoom_factor;
+		if (camera[camera_selected].fov_y >= 180.0f) // fov_y가 180이 되면 화면에 아무것도 안보임, 이후 화면 뒤집힘
+			camera[camera_selected].fov_y = 179.0f;
+		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio,
+			camera[camera_selected].near_clip, camera[camera_selected].far_clip);
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		//printf("%f\n", camera[camera_selected].fov_y);
+		glutPostRedisplay();
+		break;
+	case ',':		// Increase zoom factor
+		camera[camera_selected].zoom_factor += 1.0f;
+		glutPostRedisplay();
+		break;
+	case '.':		// Decrease zoom factor
+		camera[camera_selected].zoom_factor -= 1.0f;
+		if(camera[camera_selected].zoom_factor <= 0.0f)
+			camera[camera_selected].zoom_factor = 1.0f;
+		glutPostRedisplay();
+		break;
+	case '1':					// static CCTV 1
+		glutPostRedisplay();
+		break;
+	case '2':					// static CCTV 2
+		glutPostRedisplay();
+		break;
+	case '3':					// static CCTV 3
+		glutPostRedisplay();
+		break;
+	case '4':					// dynamic CCTV
+		glutPostRedisplay();
+		break;
+
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -207,22 +267,22 @@ void motion_1(int x, int y) {
 		delx = (float)(x - prevx), dely = -(float)(y - prevy);
 		prevx = x, prevy = y;
 
-		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[0].vrp);
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 v벡터 기준으로 360도 회전 가능
-		mat4_tmp = glm::translate(mat4_tmp, -camera[0].vrp);
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
 
-		camera[0].prp = glm::vec3(mat4_tmp*glm::vec4(camera[0].prp, 1.0f));
-		camera[0].vup = glm::vec3(mat4_tmp*glm::vec4(camera[0].vup, 0.0f));
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));
 
-		vec3_tmp = glm::cross(camera[0].vup, camera[0].vrp - camera[0].prp);
-		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[0].vrp);
+		vec3_tmp = glm::cross(camera[camera_selected].vup, camera[camera_selected].vrp - camera[camera_selected].prp);
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, vec3_tmp);
-		mat4_tmp = glm::translate(mat4_tmp, -camera[0].vrp);
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
 
-		camera[0].prp = glm::vec3(mat4_tmp*glm::vec4(camera[0].prp, 1.0f));
-		camera[0].vup = glm::vec3(mat4_tmp*glm::vec4(camera[0].vup, 0.0f));
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));
 
-		ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
+		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
 		glutPostRedisplay();
@@ -299,6 +359,7 @@ void initialize_camera(void) {
 	camera[1].far_clip = 100.0f;
 	camera[1].zoom_factor = 1.0f; // will be used for zoomming in and out.
 	*/
+	camera_selected = 0;
 }
 
 void initialize_OpenGL(void) {
