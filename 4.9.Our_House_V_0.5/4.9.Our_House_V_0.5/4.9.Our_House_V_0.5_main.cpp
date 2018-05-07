@@ -91,12 +91,12 @@ void display(void) {
 }
 
 void initialize_camera(void);
-void motion_translate_xaxis(int x, int y);
-void motion_translate_yaxis(int x, int y);
-void motion_translate_zaxis(int x, int y);
-void motion_rotate_xaxis(int x, int y);
-void motion_rotate_yaxis(int x, int y);
-void motion_rotate_zaxis(int x, int y);
+void motion_translate_uaxis(int x, int y);
+void motion_translate_vaxis(int x, int y);
+void motion_translate_naxis(int x, int y);
+void motion_rotate_uaxis(int x, int y);
+void motion_rotate_vaxis(int x, int y);
+void motion_rotate_naxis(int x, int y);
 
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
@@ -105,28 +105,28 @@ void keyboard(unsigned char key, int x, int y) {
 	case 27: // ESC key
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
-	case 'r':					// Translation for x axis
-		glutMotionFunc(motion_translate_xaxis);
+	case 'x':					// Translation for u axis
+		glutMotionFunc(motion_translate_uaxis);
 		glutPostRedisplay();
 		break;
-	case 'g':					// Translation for y axis
-		glutMotionFunc(motion_translate_xaxis);
+	case 'y':					// Translation for v axis
+		glutMotionFunc(motion_translate_vaxis);
 		glutPostRedisplay();
 		break;
-	case 'b':					// Translation for z axis
-		glutMotionFunc(motion_translate_xaxis);
+	case 'z':					// Translation for n axis
+		glutMotionFunc(motion_translate_naxis);
 		glutPostRedisplay();
 		break;
-	case 'x':					// Rotation for x axis
-		glutMotionFunc(motion_rotate_xaxis);
+	case 'u':					// Rotation for u axis
+		glutMotionFunc(motion_rotate_uaxis);
 		glutPostRedisplay();
 		break;
-	case 'y':					// Rotation for y axis
-		glutMotionFunc(motion_rotate_yaxis);
+	case 'v':					// Rotation for v axis
+		glutMotionFunc(motion_rotate_vaxis);
 		glutPostRedisplay();
 		break;
-	case 'z':					// Rotation for z axis
-		glutMotionFunc(motion_rotate_zaxis);
+	case 'n':					// Rotation for n axis
+		glutMotionFunc(motion_rotate_naxis);
 		glutPostRedisplay();
 		break;
 	case 'i':					// Zoom in
@@ -302,16 +302,20 @@ void motion_1(int x, int y) {
 		glutPostRedisplay();
 	}
 }
-void motion_translate_xaxis(int x, int y) {
+void motion_translate_uaxis(int x, int y) {
 	glutPostRedisplay();
 }
-void motion_translate_yaxis(int x, int y) {
+void motion_translate_vaxis(int x, int y) {
 	glutPostRedisplay();
 }
-void motion_translate_zaxis(int x, int y) {
+void motion_translate_naxis(int x, int y) {
 	glutPostRedisplay();
 }
-void motion_rotate_xaxis(int x, int y) {
+
+void motion_rotate_uaxis(int x, int y) {
+
+}
+void motion_rotate_vaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
 	float delx, dely;
@@ -319,56 +323,13 @@ void motion_rotate_xaxis(int x, int y) {
 	if (leftbutton_pressed) {
 		delx = (float)(x - prevx), dely = -(float)(y - prevy);
 		prevx = x, prevy = y;
-
-		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
-		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
-		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
-
-		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
-		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
-
-		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
-
-		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
-		glutPostRedisplay();
-	}
-}
-void motion_rotate_yaxis(int x, int y) {
-	glm::mat4 mat4_tmp;
-	glm::vec3 vec3_tmp;
-	float delx, dely;
-
-	if (leftbutton_pressed) {
-		delx = (float)(x - prevx), dely = -(float)(y - prevy);
-		prevx = x, prevy = y;
-
-		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
-		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
-		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
-
-		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
-		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
-
-		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
-
-		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
-		glutPostRedisplay();
-	}
-}
-void motion_rotate_zaxis(int x, int y) {
-	glm::mat4 mat4_tmp;
-	glm::vec3 vec3_tmp;
-	float delx, dely;
-
-	if (leftbutton_pressed) {
-		delx = (float)(x - prevx), dely = -(float)(y - prevy);
-		prevx = x, prevy = y;
-
-		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
+		// prp를 원점으로 만든 뒤, 원하는만큼 회전 시키고, 다시 돌아옴. 이 변환에 대해서는 vrp(뷰 참조점, 카메라가 볼 곳)와 up vector만 적용됨.
+		// prp는 고정되어 있어야하기 때문(up vector도 자기 자리에서 vrp따라 회전해 주어야함)
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	//좌우움직이면 v벡터 기준으로 360도 회전 가능
-		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
 
-		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
 		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
 		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
@@ -377,7 +338,9 @@ void motion_rotate_zaxis(int x, int y) {
 		glutPostRedisplay();
 	}
 }
+void motion_rotate_naxis(int x, int y) {
 
+}
 void register_callbacks(void) {
 	cc.left_button_status = GLUT_UP;
 
