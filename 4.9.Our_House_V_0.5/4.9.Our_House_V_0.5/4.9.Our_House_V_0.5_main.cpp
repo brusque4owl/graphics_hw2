@@ -312,10 +312,48 @@ void motion_translate_zaxis(int x, int y) {
 	glutPostRedisplay();
 }
 void motion_rotate_xaxis(int x, int y) {
-	glutPostRedisplay();
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
+
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
+
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+
+		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+
+		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
+		glutPostRedisplay();
+	}
 }
 void motion_rotate_yaxis(int x, int y) {
-	glutPostRedisplay();
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
+
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].vrp);
+		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].vrp);
+
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+
+		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+
+		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
+		glutPostRedisplay();
+	}
 }
 void motion_rotate_zaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
