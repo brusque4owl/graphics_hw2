@@ -134,10 +134,9 @@ void keyboard(unsigned char key, int x, int y) {
 		camera[camera_selected].fov_y = camera[camera_selected].fov_y - camera[camera_selected].zoom_factor;
 		if (camera[camera_selected].fov_y <= 0.0f) // fov_y가 0이 되면 화면에 아무것도 안보임, 이후 화면 뒤집힘
 			camera[camera_selected].fov_y = 1.0f;
-		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, 
-																camera[camera_selected].near_clip, camera[camera_selected].far_clip);
+		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
-		//printf("%f\n", camera[camera_selected].fov_y);
+		//printf("%f\t%f\t%f\t%f\n", camera[camera_selected].fov_y, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		glutPostRedisplay();
 		break;
 	case 'o':					// Zoom out
@@ -160,6 +159,21 @@ void keyboard(unsigned char key, int x, int y) {
 			camera[camera_selected].zoom_factor = 1.0f;
 		glutPostRedisplay();
 		break;
+
+	case '/':		// Initialize main camera
+		camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
+		camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
+		camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+		//u,v,n벡터를 lookAt으로 세팅
+		ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
+		printf("%f\n",camera[camera_selected].fov_y);
+		camera[camera_selected].fov_y = 15.0f;
+		camera[camera_selected].zoom_factor = 1.0f;
+		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		glutPostRedisplay();
+		break;
+
 	case '1':					// static CCTV 1
 		glutPostRedisplay();
 		break;
