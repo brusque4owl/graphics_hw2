@@ -532,10 +532,9 @@ void initialize_camera(void) {
 
 	
 //initialize the 1st camera. used for front_view
-	camera[1].prp = glm::vec3(125.0f, 80.0f, 200.0f);	// 카메라 위치
-	camera[1].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
+	camera[1].prp = glm::vec3(800.0f, 90.0f, 25.0f);	// 카메라 위치
+	camera[1].vrp = glm::vec3(0.0f, 90.0f, 25.0f);		// 바라보는 곳
 	camera[1].vup = glm::vec3(0.0f, 0.0f, 1.0f);
-
 	ViewMatrix[1] = glm::lookAt(camera[1].prp, camera[1].vrp, camera[1].vup);
 	//camera[1].vup = glm::vec3(ViewMatrix[1][0].y, ViewMatrix[1][1].y, ViewMatrix[1][2].y); // in this example code, make vup always equal to the v direction.
 
@@ -547,8 +546,8 @@ void initialize_camera(void) {
 
 //initialize the 2nd camera used for side_view
 //	ViewMatrix = glm::lookAt(glm::vec3(800.0f, 90.0f, 25.0f), glm::vec3(0.0f, 90.0f, 25.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	camera[2].prp = glm::vec3(800.0f, 90.0f, 25.0f);	// 카메라 위치
-	camera[2].vrp = glm::vec3(0.0f, 90.0f, 25.0f);		// 바라보는 곳
+	camera[2].prp = glm::vec3(120.0f, 800.0f, 25.0f);	// 카메라 위치
+	camera[2].vrp = glm::vec3(120.0f, 0.0f, 25.0f);		// 바라보는 곳
 	camera[2].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[2] = glm::lookAt(camera[2].prp, camera[2].vrp, camera[2].vup);
@@ -587,7 +586,7 @@ void initialize_OpenGL(void) {
 		ViewMatrix[0] = glm::lookAt(glm::vec3(120.0f, 90.0f, 1000.0f), glm::vec3(120.0f, 90.0f, 0.0f),
 			glm::vec3(-10.0f, 0.0f, 0.0f));
 	}
-	// side view
+	// front view
 	if (0) {
 		ViewMatrix[0] = glm::lookAt(glm::vec3(800.0f, 90.0f, 25.0f), glm::vec3(0.0f, 90.0f, 25.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f));
