@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glew.h>
@@ -304,7 +305,31 @@ void motion_1(int x, int y) {
 	}
 }
 void motion_translate_uaxis(int x, int y) {
-	glutPostRedisplay();
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	glm::vec3 vec3_unit_uaxis;
+	//printf("%f\t%f\t%f\n",vec3_tmp.x, vec3_tmp.y, vec3_tmp.z);
+	float sqrt_uvector;
+	float dely;
+
+	if (leftbutton_pressed) {
+		dely = -(float)(y - prevy);
+		prevy = y;
+
+		vec3_tmp = camera[camera_selected].prp - camera[camera_selected].vrp;			// prp-vrp = n벡터  <- 이 모든건 카메라 축 기준
+		sqrt_uvector = sqrt((vec3_tmp.x*vec3_tmp.x) + (vec3_tmp.y*vec3_tmp.y) + (vec3_tmp.z*vec3_tmp.z));
+		vec3_unit_uaxis = glm::vec3( vec3_tmp.x / sqrt_uvector, vec3_tmp.y / sqrt_uvector, vec3_tmp.z / sqrt_uvector);
+		mat4_tmp = glm::translate(glm::mat4(1.0f), -dely*vec3_unit_uaxis);
+
+		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+
+		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		glutPostRedisplay();
+	}
 }
 void motion_translate_vaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
@@ -317,10 +342,10 @@ void motion_translate_vaxis(int x, int y) {
 
 		mat4_tmp = glm::translate(glm::mat4(1.0f), dely*camera[camera_selected].vup);
 		
-		// prp(카메라 위치), vrp(카메라가 바라보는 곳)은 변경  // vup(카메라 위)은 불변 - 회전하는 것이 아니기 때문
+		// prp(카메라 위치), vrp(카메라가 바라보는 곳)은 변경  // vup(카메라 위)도 변경 - prp가 움직이니까 vup도 따라가야함.
 		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
-		//camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
