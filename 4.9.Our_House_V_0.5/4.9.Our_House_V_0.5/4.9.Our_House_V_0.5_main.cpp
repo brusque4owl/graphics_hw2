@@ -51,46 +51,90 @@ typedef struct _CALLBACK_CONTEXT {
 } CALLBACK_CONTEXT;
 CALLBACK_CONTEXT cc;
 
+#define VIEW_CAMERA 0
+#define VIEW_CCTV	1
+int view_mode;
 void display_camera(int cam_index){
 
 	glViewport(viewport[cam_index].x, viewport[cam_index].y, viewport[cam_index].w, viewport[cam_index].h);
 
-	glLineWidth(2.0f);
-	draw_axes(cam_index);
-	glLineWidth(1.0f);
+	switch(view_mode) {
+	case VIEW_CAMERA:
+		glLineWidth(2.0f);
+		draw_axes(cam_index);
+		glLineWidth(1.0f);
 
+		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
 
-	draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_TABLE]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_TABLE]), 1, cam_index);	// takes given teapot
 
-	draw_static_object(&(static_objects[OBJ_TABLE]), 0, cam_index);
-	draw_static_object(&(static_objects[OBJ_TABLE]), 1, cam_index);	// takes given teapot
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 1, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 2, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 3, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 4, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 5, cam_index);			// NEW OBJ_LIGHT
 
-	draw_static_object(&(static_objects[OBJ_LIGHT]), 0, cam_index);
-	draw_static_object(&(static_objects[OBJ_LIGHT]), 1, cam_index);
-	draw_static_object(&(static_objects[OBJ_LIGHT]), 2, cam_index);
-	draw_static_object(&(static_objects[OBJ_LIGHT]), 3, cam_index);
-	draw_static_object(&(static_objects[OBJ_LIGHT]), 4, cam_index);
-	draw_static_object(&(static_objects[OBJ_LIGHT]), 5, cam_index);			// NEW OBJ_LIGHT
+		draw_static_object(&(static_objects[OBJ_TEAPOT]), 0, cam_index);	// on the OBJ_TABLE 1
+		draw_static_object(&(static_objects[OBJ_TEAPOT]), 1, cam_index);			// NEW OBJ_TEAPOT
+		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 1, cam_index);		// NEW OBJ_NEW_CHAIR
+		draw_static_object(&(static_objects[OBJ_FRAME]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_FRAME]), 1, cam_index);			// NEW OBJ_FRAME
+		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 1, cam_index);		// NEW OBJ_NEW_PICTURE
+		draw_static_object(&(static_objects[OBJ_COW]), 0, cam_index);
 
-	draw_static_object(&(static_objects[OBJ_TEAPOT]), 0, cam_index);	// on the OBJ_TABLE 1
-	draw_static_object(&(static_objects[OBJ_TEAPOT]), 1, cam_index);			// NEW OBJ_TEAPOT
-	draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 0, cam_index);
-	draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 1, cam_index);		// NEW OBJ_NEW_CHAIR
-	draw_static_object(&(static_objects[OBJ_FRAME]), 0, cam_index);
-	draw_static_object(&(static_objects[OBJ_FRAME]), 1, cam_index);			// NEW OBJ_FRAME
-	draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 0, cam_index);
-	draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 1, cam_index);		// NEW OBJ_NEW_PICTURE
-	draw_static_object(&(static_objects[OBJ_COW]), 0, cam_index);
+		draw_animated_tiger(cam_index);
+		break;
+	case VIEW_CCTV:
+		glLineWidth(2.0f);
+		draw_axes(cam_index);
+		glLineWidth(1.0f);
 
-	draw_animated_tiger(cam_index);
+		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
 
+		draw_static_object(&(static_objects[OBJ_TABLE]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_TABLE]), 1, cam_index);	// takes given teapot
+
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 1, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 2, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 3, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 4, cam_index);
+		draw_static_object(&(static_objects[OBJ_LIGHT]), 5, cam_index);			// NEW OBJ_LIGHT
+
+		draw_static_object(&(static_objects[OBJ_TEAPOT]), 0, cam_index);	// on the OBJ_TABLE 1
+		draw_static_object(&(static_objects[OBJ_TEAPOT]), 1, cam_index);			// NEW OBJ_TEAPOT
+		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 1, cam_index);		// NEW OBJ_NEW_CHAIR
+		draw_static_object(&(static_objects[OBJ_FRAME]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_FRAME]), 1, cam_index);			// NEW OBJ_FRAME
+		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 0, cam_index);
+		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 1, cam_index);		// NEW OBJ_NEW_PICTURE
+		draw_static_object(&(static_objects[OBJ_COW]), 0, cam_index);
+
+		draw_animated_tiger(cam_index);
+		break;
+	} // END OF SWITCH(VIEW_MODE)
 }
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	display_camera(0);	// main_camera
-	display_camera(1);	// front_view
-	display_camera(2);	// side_view
-	display_camera(3);	// top_view
+	switch (view_mode) {
+	case VIEW_CAMERA:
+		display_camera(0);	// main_camera
+		display_camera(1);	// front_view
+		display_camera(2);	// side_view
+		display_camera(3);	// top_view
+		break;
+	case VIEW_CCTV:
+		display_camera(4);	// static cctv 1
+		display_camera(5);	// static cctv 2
+		display_camera(6);	// static cctv 3
+		display_camera(7);	// dynamic cctv
+		break;
+	}
 	glutSwapBuffers();
 }
 
@@ -176,19 +220,11 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 
-	case '1':					// static CCTV 1
+	case 'c':					// change mode between CAMERA MODE and CCTV MODE
+		view_mode = 1 - view_mode;
 		glutPostRedisplay();
 		break;
-	case '2':					// static CCTV 2
-		glutPostRedisplay();
-		break;
-	case '3':					// static CCTV 3
-		glutPostRedisplay();
-		break;
-	case '4':					// dynamic CCTV
-		glutPostRedisplay();
-		break;
-
+	/*
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -211,6 +247,7 @@ void keyboard(unsigned char key, int x, int y) {
 			break;
 		}
 		break;
+	*/
 	case 'f':
 		polygon_fill_on = 1 - polygon_fill_on;
 		if (polygon_fill_on) {
@@ -255,21 +292,19 @@ void reshape(int width, int height) {
 	ProjectionMatrix[0] = glm::perspective(camera[0].fov_y*TO_RADIAN, camera[0].aspect_ratio, camera[0].near_clip, camera[0].far_clip);
 	ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
 
-	
-	camera[1].aspect_ratio = camera[0].aspect_ratio; // for the time being ...
+	camera[1].aspect_ratio = camera[0].aspect_ratio;
 	viewport[1].x = (int)(0.70f*width); viewport[1].y = (int)(0.70f*height);
 	viewport[1].w = (int)(0.30f*width); viewport[1].h = (int)(0.30*height);
 	ProjectionMatrix[1] = glm::perspective(camera[1].fov_y*TO_RADIAN, camera[1].aspect_ratio, camera[1].near_clip, camera[1].far_clip);
 	ViewProjectionMatrix[1] = ProjectionMatrix[1] * ViewMatrix[1];
 	
-
-	camera[2].aspect_ratio = camera[0].aspect_ratio; // for the time being ...
+	camera[2].aspect_ratio = camera[0].aspect_ratio;
 	viewport[2].x = (int)(0.70f*width); viewport[2].y = (int)(0.40f*height);
 	viewport[2].w = (int)(0.30f*width); viewport[2].h = (int)(0.30*height);
 	ProjectionMatrix[2] = glm::perspective(camera[2].fov_y*TO_RADIAN, camera[2].aspect_ratio, camera[2].near_clip, camera[2].far_clip);
 	ViewProjectionMatrix[2] = ProjectionMatrix[2] * ViewMatrix[2];
 
-	camera[3].aspect_ratio = camera[0].aspect_ratio; // for the time being ...
+	camera[3].aspect_ratio = camera[0].aspect_ratio;
 	viewport[3].x = (int)(0.70f*width); viewport[3].y = (int)(0.10f*height);
 	viewport[3].w = (int)(0.30f*width); viewport[3].h = (int)(0.30*height);
 	ProjectionMatrix[3] = glm::perspective(camera[3].fov_y*TO_RADIAN, camera[3].aspect_ratio, camera[3].near_clip, camera[3].far_clip);
@@ -571,6 +606,7 @@ void initialize_camera(void) {
 	camera[3].far_clip = 10000.0f;
 
 	camera_selected = 0;
+	view_mode = VIEW_CAMERA;
 }
 
 void initialize_OpenGL(void) {
