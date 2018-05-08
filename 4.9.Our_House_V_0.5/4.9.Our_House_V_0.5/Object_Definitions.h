@@ -378,11 +378,11 @@ void define_static_objects(void) {
 	n_static_objects = 8;
 }
 
-void draw_static_object(Object *obj_ptr, int instance_ID) {
+void draw_static_object(Object *obj_ptr, int instance_ID, int cam_index) {
 	glFrontFace(obj_ptr->front_face_mode);
 
-	ModelViewMatrix[camera_selected] = ViewMatrix[camera_selected] * obj_ptr->ModelMatrix[instance_ID];
-	ModelViewProjectionMatrix = ProjectionMatrix[camera_selected] * ModelViewMatrix[camera_selected];
+	ModelViewMatrix[cam_index] = ViewMatrix[cam_index] * obj_ptr->ModelMatrix[instance_ID];
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
 	glUniform3f(loc_primitive_color, obj_ptr->material[instance_ID].diffuse.r,
@@ -418,9 +418,9 @@ void define_axes(void) {
 }
 
 #define WC_AXIS_LENGTH		60.0f
-void draw_axes() {
-	ModelViewMatrix[camera_selected] = glm::scale(ViewMatrix[camera_selected], glm::vec3(WC_AXIS_LENGTH, WC_AXIS_LENGTH, WC_AXIS_LENGTH));
-	ModelViewProjectionMatrix = ProjectionMatrix[camera_selected] * ModelViewMatrix[camera_selected];
+void draw_axes(int cam_index) {
+	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_AXIS_LENGTH, WC_AXIS_LENGTH, WC_AXIS_LENGTH));
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
 	glBindVertexArray(VAO_axes);
@@ -460,12 +460,12 @@ void define_animated_tiger(void) {
 	}
 }
 
-void draw_animated_tiger() {
-	ModelViewMatrix[camera_selected] = glm::rotate(ViewMatrix[camera_selected], -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
- 	ModelViewMatrix[camera_selected] = glm::translate(ModelViewMatrix[camera_selected], glm::vec3(100.0f, 0.0f, 0.0f));
- 	ModelViewMatrix[camera_selected] *= tiger[tiger_data.cur_frame].ModelMatrix[camera_selected];
+void draw_animated_tiger(int cam_index) {
+	ModelViewMatrix[cam_index] = glm::rotate(ViewMatrix[cam_index], -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+ 	ModelViewMatrix[cam_index] = glm::translate(ModelViewMatrix[cam_index], glm::vec3(100.0f, 0.0f, 0.0f));
+ 	ModelViewMatrix[cam_index] *= tiger[tiger_data.cur_frame].ModelMatrix[0];	// ModelMatrix[0]만 scale(0.2,0.2,0.2)가 됐으므로 여기는 ModelMatrix[cam_index]가 아니라 ModelMatrix[0]을 써줘야함.
 
-	ModelViewProjectionMatrix = ProjectionMatrix[camera_selected] * ModelViewMatrix[camera_selected];
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
 	glUniform3f(loc_primitive_color, tiger[tiger_data.cur_frame].material[0].diffuse.r,
@@ -474,10 +474,9 @@ void draw_animated_tiger() {
 	glBindVertexArray(tiger[tiger_data.cur_frame].VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3 * tiger[tiger_data.cur_frame].n_triangles);
 	glBindVertexArray(0);
-
+	//if(cam_index==0) // Only for main_camera
 	ModelViewProjectionMatrix = glm::scale(ModelViewProjectionMatrix, glm::vec3(20.0f, 20.0f, 20.0f));
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-	draw_axes();
 }
 
 void cleanup_OpenGL_stuffs(void) {
