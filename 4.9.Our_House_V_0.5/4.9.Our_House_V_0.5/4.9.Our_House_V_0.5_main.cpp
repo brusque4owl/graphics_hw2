@@ -286,6 +286,7 @@ void reshape(int width, int height) {
 }
 */
 void reshape(int width, int height) {
+// VIEW_CAMERA mode
 	camera[0].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
 	viewport[0].x = viewport[0].y = 0;
 	viewport[0].w = (int)(0.70f*width); viewport[0].h = (int)(0.70f*height);
@@ -309,6 +310,32 @@ void reshape(int width, int height) {
 	viewport[3].w = (int)(0.30f*width); viewport[3].h = (int)(0.30*height);
 	ProjectionMatrix[3] = glm::perspective(camera[3].fov_y*TO_RADIAN, camera[3].aspect_ratio, camera[3].near_clip, camera[3].far_clip);
 	ViewProjectionMatrix[3] = ProjectionMatrix[3] * ViewMatrix[3];
+
+// VIEW_CCTV mode
+	camera[4].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
+	viewport[4].x = viewport[4].y = 0;
+	viewport[4].w = (int)(0.30f*width); viewport[4].h = (int)(0.30f*height);
+	ProjectionMatrix[4] = glm::perspective(camera[4].fov_y*TO_RADIAN, camera[4].aspect_ratio, camera[4].near_clip, camera[4].far_clip);
+	ViewProjectionMatrix[4] = ProjectionMatrix[4] * ViewMatrix[4];
+
+	camera[5].aspect_ratio = camera[4].aspect_ratio;
+	viewport[5].x = 0; viewport[5].y = (int)(0.30f*height);
+	viewport[5].w = (int)(0.30f*width); viewport[5].h = (int)(0.30*height);
+	ProjectionMatrix[5] = glm::perspective(camera[5].fov_y*TO_RADIAN, camera[5].aspect_ratio, camera[5].near_clip, camera[5].far_clip);
+	ViewProjectionMatrix[5] = ProjectionMatrix[5] * ViewMatrix[5];
+
+	camera[6].aspect_ratio = camera[4].aspect_ratio;
+	viewport[6].x = 0; viewport[6].y = (int)(0.60f*height);
+	viewport[6].w = (int)(0.30f*width); viewport[6].h = (int)(0.30*height);
+	ProjectionMatrix[6] = glm::perspective(camera[6].fov_y*TO_RADIAN, camera[6].aspect_ratio, camera[6].near_clip, camera[6].far_clip);
+	ViewProjectionMatrix[6] = ProjectionMatrix[6] * ViewMatrix[6];
+	
+	camera[7].aspect_ratio = camera[4].aspect_ratio;
+	viewport[7].x = (int)(0.30f*width); viewport[7].y = 0;
+	viewport[7].w = (int)(0.70f*width); viewport[7].h = (int)(0.70*height);
+	ProjectionMatrix[7] = glm::perspective(camera[7].fov_y*TO_RADIAN, camera[7].aspect_ratio, camera[7].near_clip, camera[7].far_clip);
+	ViewProjectionMatrix[7] = ProjectionMatrix[7] * ViewMatrix[7];
+
 	glutPostRedisplay();
 }
 
@@ -557,7 +584,6 @@ void initialize_camera(void) {
 	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
 	//camera[0].vup = glm::vec3(ViewMatrix[0][0].y, ViewMatrix[0][1].y, ViewMatrix[0][2].y); // in this example code, make vup always equal to the v direction.
 
-
 //	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
 	camera[0].fov_y = 15.0f;
 	camera[0].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
@@ -604,6 +630,56 @@ void initialize_camera(void) {
 	camera[3].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[3].near_clip = 1.0f;
 	camera[3].far_clip = 10000.0f;
+
+// VIEW_CCTV
+// static cctv 1
+	camera[4].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
+	camera[4].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
+	camera[4].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+
+	ViewMatrix[4] = glm::lookAt(camera[4].prp, camera[4].vrp, camera[4].vup);
+
+	camera[4].fov_y = 15.0f;
+	camera[4].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[4].near_clip = 1.0f;
+	camera[4].far_clip = 10000.0f;
+
+// static cctv 2
+	camera[5].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
+	camera[5].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
+	camera[5].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+
+	ViewMatrix[5] = glm::lookAt(camera[5].prp, camera[5].vrp, camera[5].vup);
+
+	camera[5].fov_y = 15.0f;
+	camera[5].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[5].near_clip = 1.0f;
+	camera[5].far_clip = 10000.0f;
+
+// static cctv 3
+	camera[6].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
+	camera[6].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
+	camera[6].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+
+	ViewMatrix[6] = glm::lookAt(camera[6].prp, camera[6].vrp, camera[6].vup);
+
+	camera[6].fov_y = 15.0f;
+	camera[6].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[6].near_clip = 1.0f;
+	camera[6].far_clip = 10000.0f;
+
+// dynamic cctv
+	camera[7].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
+	camera[7].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
+	camera[7].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+
+	ViewMatrix[7] = glm::lookAt(camera[7].prp, camera[7].vrp, camera[7].vup);
+
+	camera[7].fov_y = 15.0f;
+	camera[7].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[7].near_clip = 1.0f;
+	camera[7].far_clip = 10000.0f;
+
 
 	camera_selected = 0;
 	view_mode = VIEW_CAMERA;
