@@ -33,7 +33,12 @@ typedef struct {
 CAMERA camera[NUMBER_OF_CAMERAS];
 glm::vec3 init_camera_vup;
 glm::mat4 mat_rotate = glm::mat4(1.0f);
-float angle_rotate;
+float angle_rotate_u = 0.0f;
+float angle_rotate_v = 0.0f;
+float angle_rotate_n = 0.0f;
+glm::vec3 rotate_axis_u = glm::vec3(0.0f, 0.0f, 1.0f);
+glm::vec3 rotate_axis_v = glm::vec3(0.0f, 0.0f, 1.0f);
+glm::vec3 rotate_axis_n = glm::vec3(0.0f, 0.0f, 1.0f);
 int camera_selected; // 0 for main_camera, 7 for dynamic_cctv 
 
 #include "Object_Definitions.h"
@@ -225,6 +230,10 @@ void keyboard(unsigned char key, int x, int y) {
 				camera[0].vrp = glm::vec3(197.0f, 86.0f, 13.0f);		// 바라보는 곳
 				camera[0].vup = init_camera_vup;
 				camera[camera_selected].fov_y = 50.0f;
+				angle_rotate_u = 0.0f;
+				angle_rotate_v = 0.0f;
+				rotate_axis_u = glm::vec3(0.0f, 0.0f, 1.0f);
+				rotate_axis_v = glm::vec3(0.0f, 0.0f, 1.0f);
 				break;
 
 			case VIEW_CCTV:
@@ -535,6 +544,8 @@ void motion_rotate_uaxis(int x, int y) {
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*dely*TO_RADIAN, vec3_tmp);		// u벡터(카메라의 오른쪽)를 둘레로 회전 : 양의 각도로 회전 시, 카메라가 고개를 쳐드니까 화면은 아래로 내려감
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
+		angle_rotate_u += CAM_ROT_SENSITIVITY * dely*TO_RADIAN;
+		rotate_axis_u = vec3_tmp;
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
 
@@ -567,10 +578,8 @@ void motion_rotate_vaxis(int x, int y) {
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*-delx*TO_RADIAN, camera[camera_selected].vup);	//좌우움직이면 vup벡터 기준으로 360도 회전 가능
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
-		
-		mat_rotate = glm::rotate(glm::mat4(1.0f), CAM_ROT_SENSITIVITY*-delx * TO_RADIAN, camera[camera_selected].vup);
-		
-		angle_rotate += CAM_ROT_SENSITIVITY * -delx * TO_RADIAN;
+		angle_rotate_v += CAM_ROT_SENSITIVITY * -delx * TO_RADIAN;
+		rotate_axis_v = camera[camera_selected].vup;
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
 
@@ -602,6 +611,8 @@ void motion_rotate_naxis(int x, int y) {
 		// n벡터(카메라의 뒤쪽)를 둘레로 회전 : 양의 각도로 회전 시, 카메라가 고개를 왼쪽으로 까딱하니까 화면은 오른쪽으로 돌아감
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*delx*TO_RADIAN, vec3_tmp);	
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
+		angle_rotate_n += CAM_ROT_SENSITIVITY *delx*TO_RADIAN;
+		rotate_axis_n = vec3_tmp;
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
 		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
