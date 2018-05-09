@@ -155,18 +155,15 @@ void keyboard(unsigned char key, int x, int y) {
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
 	case 'x':					// Translation for u axis
-		if(view_mode==VIEW_CAMERA) // Only for main_cameras, not for dynamic_cctv
-			glutMotionFunc(motion_translate_uaxis);
+		glutMotionFunc(motion_translate_uaxis);
 		glutPostRedisplay();
 		break;
 	case 'y':					// Translation for v axis
-		if (view_mode == VIEW_CAMERA) // Only for main_cameras, not for dynamic_cctv
-			glutMotionFunc(motion_translate_vaxis);
+		glutMotionFunc(motion_translate_vaxis);
 		glutPostRedisplay();
 		break;
 	case 'z':					// Translation for n axis
-		if (view_mode == VIEW_CAMERA) // Only for main_cameras, not for dynamic_cctv
-			glutMotionFunc(motion_translate_naxis);
+		glutMotionFunc(motion_translate_naxis);
 		glutPostRedisplay();
 		break;
 	case 'u':					// Rotation for u axis
@@ -431,7 +428,7 @@ void motion_translate_uaxis(int x, int y) {
 	float sqrt_vector;
 	float delx;
 
-	if (leftbutton_pressed) {
+	if (leftbutton_pressed && view_mode == VIEW_CAMERA) {
 		delx = (float)(x - prevx);
 		prevx = x;
 
@@ -460,7 +457,7 @@ void motion_translate_vaxis(int x, int y) {
 	glm::vec3 vec3_tmp;
 	float dely;
 
-	if (leftbutton_pressed) {
+	if (leftbutton_pressed && view_mode == VIEW_CAMERA) {
 		dely = -(float)(y - prevy);
 		prevy = y;
 
@@ -489,7 +486,7 @@ void motion_translate_naxis(int x, int y) {
 	float sqrt_vector;
 	float dely;
 
-	if (leftbutton_pressed) {
+	if (leftbutton_pressed && view_mode == VIEW_CAMERA) {
 		dely = -(float)(y - prevy);
 		prevy = y;
 
@@ -690,7 +687,7 @@ void initialize_camera(void) {
 
 // VIEW_CCTV
 // static cctv 1
-	camera[4].prp = glm::vec3(57.0f, 145.0f, 50.0f);	// 카메라 위치
+	camera[4].prp = glm::vec3(57.0f, 145.0f, 45.0f);	// 카메라 위치
 	camera[4].vrp = glm::vec3(41.0f, 137.0f, 26.0f);		// 바라보는 곳
 	camera[4].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
@@ -702,7 +699,7 @@ void initialize_camera(void) {
 	camera[4].far_clip = 10000.0f;
 
 // static cctv 2
-	camera[5].prp = glm::vec3(162.0f, 62.0f, 50.0f);	// 카메라 위치
+	camera[5].prp = glm::vec3(162.0f, 62.0f, 45.0f);	// 카메라 위치
 	camera[5].vrp = glm::vec3(127.0f, 82.0f, 21.0f);		// 바라보는 곳
 	camera[5].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
@@ -714,7 +711,7 @@ void initialize_camera(void) {
 	camera[5].far_clip = 10000.0f;
 
 // static cctv 3
-	camera[6].prp = glm::vec3(210.0f, 43.0f, 50.0f);	// 카메라 위치
+	camera[6].prp = glm::vec3(210.0f, 43.0f, 45.0f);	// 카메라 위치
 	camera[6].vrp = glm::vec3(200.0f, 80.0f, 16.0f);		// 바라보는 곳
 	camera[6].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
