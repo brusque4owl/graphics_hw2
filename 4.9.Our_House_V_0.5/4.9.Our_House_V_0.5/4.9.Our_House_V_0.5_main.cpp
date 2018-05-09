@@ -155,15 +155,18 @@ void keyboard(unsigned char key, int x, int y) {
 		glutLeaveMainLoop(); // Incur destuction callback for cleanups.
 		break;
 	case 'x':					// Translation for u axis
-		glutMotionFunc(motion_translate_uaxis);
+		if(view_mode==VIEW_CAMERA) // Only for main_cameras, not for dynamic_cctv
+			glutMotionFunc(motion_translate_uaxis);
 		glutPostRedisplay();
 		break;
 	case 'y':					// Translation for v axis
-		glutMotionFunc(motion_translate_vaxis);
+		if (view_mode == VIEW_CAMERA) // Only for main_cameras, not for dynamic_cctv
+			glutMotionFunc(motion_translate_vaxis);
 		glutPostRedisplay();
 		break;
 	case 'z':					// Translation for n axis
-		glutMotionFunc(motion_translate_naxis);
+		if (view_mode == VIEW_CAMERA) // Only for main_cameras, not for dynamic_cctv
+			glutMotionFunc(motion_translate_naxis);
 		glutPostRedisplay();
 		break;
 	case 'u':					// Rotation for u axis
@@ -214,24 +217,21 @@ void keyboard(unsigned char key, int x, int y) {
 	case '/':		// Initialize main_camera or dynamic_cctv
 		switch(view_mode){
 			case VIEW_CAMERA:
-				camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
-				camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
-				camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+				camera[camera_selected].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
+				camera[camera_selected].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
+				camera[camera_selected].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+				camera[camera_selected].fov_y = 15.0f;
 				break;
-			/*
-			camera[3].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
-			camera[3].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
-			camera[3].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
-			*/
+
 			case VIEW_CCTV:
-				camera[7].prp = glm::vec3(120.0f, 90.0f, 50.0f);	// 카메라 위치
-				camera[7].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
-				camera[7].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+				camera[camera_selected].prp = glm::vec3(50.0f, 50.0f, 50.0f);	// 카메라 위치
+				camera[camera_selected].vrp = glm::vec3(10.0f, 50.0f, 20.0f);		// 바라보는 곳
+				camera[camera_selected].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+				camera[camera_selected].fov_y = 100.0f;
 				break;
 		}
 		//u,v,n벡터를 lookAt으로 세팅
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
-		camera[camera_selected].fov_y = 15.0f;
 		camera[camera_selected].zoom_factor = 1.0f;
 		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
@@ -396,7 +396,7 @@ void motion_1(int x, int y) {
 	glm::vec3 vec3_tmp;
 	float delx, dely;
 
-	if (leftbutton_pressed) {
+	if (leftbutton_pressed && view_mode==VIEW_CAMERA) {
 		delx = (float)(x - prevx), dely = -(float)(y - prevy);
 		prevx = x, prevy = y;
 
@@ -530,7 +530,8 @@ void motion_rotate_uaxis(int x, int y) {
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
-		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+		if(view_mode==VIEW_CAMERA)
+			camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
@@ -558,7 +559,8 @@ void motion_rotate_vaxis(int x, int y) {
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
-		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+		if (view_mode == VIEW_CAMERA)
+			camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
@@ -587,7 +589,8 @@ void motion_rotate_naxis(int x, int y) {
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
-		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+		if (view_mode == VIEW_CAMERA)
+			camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
@@ -725,13 +728,14 @@ void initialize_camera(void) {
 	camera[6].far_clip = 10000.0f;
 
 // dynamic cctv
-	camera[7].prp = glm::vec3(271.0f, 80.0f, 50.0f);	// 카메라 위치
-	camera[7].vrp = glm::vec3(-450.0f, 82.0f, -35.0f);		// 바라보는 곳
+	glm::vec3 cam7_tmp;
+	camera[7].prp = glm::vec3(50.0f, 50.0f, 50.0f);	// 카메라 위치
+	camera[7].vrp = glm::vec3(10.0f, 50.0f, 20.0f);		// 바라보는 곳
 	camera[7].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[7] = glm::lookAt(camera[7].prp, camera[7].vrp, camera[7].vup);
 
-	camera[7].fov_y = 15.0f;
+	camera[7].fov_y = 100.0f;
 	camera[7].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[7].near_clip = 1.0f;
 	camera[7].far_clip = 10000.0f;
