@@ -662,7 +662,6 @@ void initialize_camera(void) {
 	camera[1].near_clip = 1.0f;
 	camera[1].far_clip = 10000.0f;
 
-
 //initialize the 2nd camera used for side_view
 //	ViewMatrix = glm::lookAt(glm::vec3(800.0f, 90.0f, 25.0f), glm::vec3(0.0f, 90.0f, 25.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	camera[2].prp = glm::vec3(120.0f, 800.0f, 25.0f);	// 카메라 위치
