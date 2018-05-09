@@ -466,6 +466,7 @@ void draw_main_camera_axes(int cam_index) {
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
+
 	glBindVertexArray(VAO_axes);
 	glUniform3fv(loc_primitive_color, 1, axes_color[0]);
 	glDrawArrays(GL_LINES, 0, 2);
@@ -486,6 +487,7 @@ void draw_main_camera_axes(int cam_index) {
 	glBindVertexArray(0);
 	*/
 }
+
 
 #define N_TIGER_FRAMES 12
 Object tiger[N_TIGER_FRAMES];

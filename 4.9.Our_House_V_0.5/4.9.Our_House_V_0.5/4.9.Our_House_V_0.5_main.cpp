@@ -131,6 +131,7 @@ void display_camera(int cam_index){ // display()함수로 인해 매초마다 불러짐.
 }
 void display(void) {   // 매초마다 불러짐
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	switch (view_mode) {
 	case VIEW_CAMERA:
 		display_camera(0);	// main_camera
