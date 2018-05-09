@@ -437,10 +437,6 @@ GLuint VBO_main_camera_axes, VAO_main_camera_axes;
 GLfloat vertices_main_camera_axes[6][3] = {
 	{ 10.0f, 10.0f, 5.0f },{ 11.0f, 10.0f, 5.0f },{ 10.0f, 10.0f, 5.0f },{ 10.0f, 11.0f, 5.0f },
 	{ 10.0f, 10.0f, 5.0f },{ 10.0f, 10.0f, 6.0f }
-	/*
-	{ 100.0f, 100.0f, 50.0f },{ 101.0f, 100.0f, 50.0f },{ 100.0f, 100.0f, 50.0f },{ 100.0f, 101.0f, 50.0f },
-	{ 100.0f, 100.0f, 50.0f },{ 100.0f, 100.0f, 51.0f }
-	*/
 };
 GLfloat main_camera_axes_color[3][3] = { { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } };
 
@@ -462,9 +458,9 @@ void define_main_camera_axes(void) {
 	glBindVertexArray(0);
 }
 void draw_main_camera_axes(int cam_index) {
-	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z));
+	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
+	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate, glm::vec3(0.0f,0.0f,1.0f));
 	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(15.0f, 15.0f, 15.0f));
-
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
@@ -476,6 +472,7 @@ void draw_main_camera_axes(int cam_index) {
 	glUniform3fv(loc_primitive_color, 1, axes_color[2]);
 	glDrawArrays(GL_LINES, 4, 2);
 	glBindVertexArray(0);
+
 	/*
 	glBindVertexArray(VAO_main_camera_axes);
 	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[0]);

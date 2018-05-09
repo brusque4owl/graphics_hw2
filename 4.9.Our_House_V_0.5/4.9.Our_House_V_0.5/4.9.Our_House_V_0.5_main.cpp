@@ -32,6 +32,8 @@ typedef struct {
 } CAMERA;
 CAMERA camera[NUMBER_OF_CAMERAS];
 glm::vec3 init_camera_vup;
+glm::mat4 mat_rotate = glm::mat4(1.0f);
+float angle_rotate;
 int camera_selected; // 0 for main_camera, 7 for dynamic_cctv 
 
 #include "Object_Definitions.h"
@@ -56,7 +58,7 @@ CALLBACK_CONTEXT cc;
 #define VIEW_CAMERA 0
 #define VIEW_CCTV	1
 int view_mode;
-void display_camera(int cam_index){
+void display_camera(int cam_index){ // display()함수로 인해 매초마다 불러짐.
 
 	glViewport(viewport[cam_index].x, viewport[cam_index].y, viewport[cam_index].w, viewport[cam_index].h);
 
@@ -122,7 +124,7 @@ void display_camera(int cam_index){
 		break;
 	} // END OF SWITCH(VIEW_MODE)
 }
-void display(void) {
+void display(void) {   // 매초마다 불러짐
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	switch (view_mode) {
 	case VIEW_CAMERA:
@@ -565,15 +567,18 @@ void motion_rotate_vaxis(int x, int y) {
 		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[camera_selected].prp);
 		mat4_tmp = glm::rotate(mat4_tmp, CAM_ROT_SENSITIVITY*-delx*TO_RADIAN, camera[camera_selected].vup);	//좌우움직이면 vup벡터 기준으로 360도 회전 가능
 		mat4_tmp = glm::translate(mat4_tmp, -camera[camera_selected].prp);
+		
+		mat_rotate = glm::rotate(glm::mat4(1.0f), CAM_ROT_SENSITIVITY*-delx * TO_RADIAN, camera[camera_selected].vup);
+		
+		angle_rotate += CAM_ROT_SENSITIVITY * -delx * TO_RADIAN;
 
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
 
-		/* // v축 둘레로 회전하니까 vup 고정
-		if (view_mode == VIEW_CAMERA)
-			camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
-		*/
+		// v축 둘레로 회전하니까 vup 고정
+		//if (view_mode == VIEW_CAMERA) camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+		
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
-
+		
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
 		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
