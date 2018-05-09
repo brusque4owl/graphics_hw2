@@ -30,7 +30,7 @@ typedef struct {
 	float fov_y, aspect_ratio, near_clip, far_clip, zoom_factor;
 } CAMERA;
 CAMERA camera[NUMBER_OF_CAMERAS];
-int camera_selected; // 0 for main_camera, 7 for dynamic_cctv
+int camera_selected; // 0 for main_camera, 7 for dynamic_cctv 
 
 #include "Object_Definitions.h"
 
@@ -185,6 +185,8 @@ void keyboard(unsigned char key, int x, int y) {
 
 		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		printf("camera_selected = %d\n", camera_selected);
+		printf("fov_y = %f\n", camera[camera_selected].fov_y);
 		glutPostRedisplay();
 		break;
 	case 'o':					// Zoom out
@@ -194,7 +196,8 @@ void keyboard(unsigned char key, int x, int y) {
 
 		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio,	camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
-
+		printf("camera_selected = %d\n", camera_selected);
+		printf("fov_y = %f\n", camera[camera_selected].fov_y);
 		glutPostRedisplay();
 		break;
 	case ',':		// Increase zoom factor
@@ -208,12 +211,26 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 
-	case '/':		// Initialize main camera
-		camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
-		camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
-		camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+	case '/':		// Initialize main_camera or dynamic_cctv
+		switch(view_mode){
+			case VIEW_CAMERA:
+				camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
+				camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
+				camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+				break;
+			/*
+			camera[3].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
+			camera[3].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
+			camera[3].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+			*/
+			case VIEW_CCTV:
+				camera[7].prp = glm::vec3(120.0f, 90.0f, 50.0f);	// 카메라 위치
+				camera[7].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
+				camera[7].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+				break;
+		}
 		//u,v,n벡터를 lookAt으로 세팅
-		ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
+		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 		camera[camera_selected].fov_y = 15.0f;
 		camera[camera_selected].zoom_factor = 1.0f;
 		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
@@ -222,6 +239,7 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 
 	case 'c':					// change mode between CAMERA MODE and CCTV MODE
+		camera_selected = 7-camera_selected;
 		view_mode = 1 - view_mode;
 		glutPostRedisplay();
 		break;
@@ -340,8 +358,8 @@ void reshape(int width, int height) {
 	
 	// dynamic_cctv
 	camera[7].aspect_ratio = camera[4].aspect_ratio;
-	viewport[7].x = (int)(0.30f*width); viewport[7].y = 0;
-	viewport[7].w = (int)(0.70f*width); viewport[7].h = (int)(0.70*height);
+	viewport[7].x = (int)(0.35f*width); viewport[7].y = 0;
+	viewport[7].w = (int)(0.65f*width); viewport[7].h = (int)(0.65*height);
 	ProjectionMatrix[7] = glm::perspective(camera[7].fov_y*TO_RADIAN, camera[7].aspect_ratio, camera[7].near_clip, camera[7].far_clip);
 	ViewProjectionMatrix[7] = ProjectionMatrix[7] * ViewMatrix[7];
 
@@ -399,9 +417,9 @@ void motion_1(int x, int y) {
 		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));
 		
 
-		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
-		ViewProjectionMatrix[0] = ProjectionMatrix[0] * ViewMatrix[0];
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		glutPostRedisplay();
 	}
 }
@@ -542,7 +560,7 @@ void motion_rotate_vaxis(int x, int y) {
 		camera[camera_selected].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
 		camera[camera_selected].vup = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
 
-		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
@@ -707,9 +725,9 @@ void initialize_camera(void) {
 	camera[6].far_clip = 10000.0f;
 
 // dynamic cctv
-	camera[7].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
-	camera[7].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
-	camera[7].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+	camera[7].prp = glm::vec3(271.0f, 80.0f, 50.0f);	// 카메라 위치
+	camera[7].vrp = glm::vec3(-450.0f, 82.0f, -35.0f);		// 바라보는 곳
+	camera[7].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[7] = glm::lookAt(camera[7].prp, camera[7].vrp, camera[7].vup);
 
@@ -717,6 +735,7 @@ void initialize_camera(void) {
 	camera[7].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[7].near_clip = 1.0f;
 	camera[7].far_clip = 10000.0f;
+	camera[7].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
 
 	camera_selected = 0;
@@ -730,6 +749,7 @@ void initialize_OpenGL(void) {
 	 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClearColor(0.12f, 0.18f, 0.12f, 1.0f);
+	/*
 	//기존에 주어진 카메라 세팅부분
 	// top view
 	if (0) {
@@ -741,8 +761,8 @@ void initialize_OpenGL(void) {
 		ViewMatrix[0] = glm::lookAt(glm::vec3(800.0f, 90.0f, 25.0f), glm::vec3(0.0f, 90.0f, 25.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f));
 	}
-	/* Used in initialize_camera()
-	if (1) {
+	// Used in initialize_camera()
+	if (0) {
 		ViewMatrix[0] = glm::lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f));
 	}
