@@ -650,7 +650,6 @@ void initialize_camera(void) {
 	camera[0].far_clip = 10000.0f;
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
-	
 //initialize the 1st camera. used for front_view
 	camera[1].prp = glm::vec3(800.0f, 90.0f, 25.0f);	// 카메라 위치
 	camera[1].vrp = glm::vec3(0.0f, 90.0f, 25.0f);		// 바라보는 곳
@@ -692,43 +691,44 @@ void initialize_camera(void) {
 
 // VIEW_CCTV
 // static cctv 1
-	camera[4].prp = glm::vec3(-8.0f, 94.0f, 50.0f);	// 카메라 위치
-	camera[4].vrp = glm::vec3(695.0f, 133.0f, -103.0f);		// 바라보는 곳
+	camera[4].prp = glm::vec3(57.0f, 145.0f, 50.0f);	// 카메라 위치
+	camera[4].vrp = glm::vec3(41.0f, 137.0f, 26.0f);		// 바라보는 곳
 	camera[4].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[4] = glm::lookAt(camera[4].prp, camera[4].vrp, camera[4].vup);
 
-	camera[4].fov_y = 15.0f;
+	camera[4].fov_y = 100.0f;
 	camera[4].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[4].near_clip = 1.0f;
 	camera[4].far_clip = 10000.0f;
 
 // static cctv 2
-	camera[5].prp = glm::vec3(240.0f, 40.0f, 50.0f);	// 카메라 위치
-	camera[5].vrp = glm::vec3(-480.0f, 42.0f, -41.0f);		// 바라보는 곳
+	camera[5].prp = glm::vec3(162.0f, 62.0f, 50.0f);	// 카메라 위치
+	camera[5].vrp = glm::vec3(127.0f, 82.0f, 21.0f);		// 바라보는 곳
 	camera[5].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[5] = glm::lookAt(camera[5].prp, camera[5].vrp, camera[5].vup);
 
-	camera[5].fov_y = 15.0f;
+	camera[5].fov_y = 60.0f;
 	camera[5].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[5].near_clip = 1.0f;
 	camera[5].far_clip = 10000.0f;
 
 // static cctv 3
-	camera[6].prp = glm::vec3(96.0f, 337.0f, 50.0f);	// 카메라 위치
-	camera[6].vrp = glm::vec3(77.0f, -379.0f, -50.0f);		// 바라보는 곳
+	camera[6].prp = glm::vec3(210.0f, 43.0f, 50.0f);	// 카메라 위치
+	camera[6].vrp = glm::vec3(200.0f, 80.0f, 16.0f);		// 바라보는 곳
 	camera[6].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[6] = glm::lookAt(camera[6].prp, camera[6].vrp, camera[6].vup);
 
-	camera[6].fov_y = 15.0f;
+	camera[6].fov_y = 80.0f;
 	camera[6].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[6].near_clip = 1.0f;
 	camera[6].far_clip = 10000.0f;
 
 // dynamic cctv
 	glm::vec3 cam7_tmp;
+
 	camera[7].prp = glm::vec3(50.0f, 50.0f, 50.0f);	// 카메라 위치
 	camera[7].vrp = glm::vec3(10.0f, 50.0f, 20.0f);		// 바라보는 곳
 	camera[7].vup = glm::vec3(0.0f, 0.0f, 1.0f);
