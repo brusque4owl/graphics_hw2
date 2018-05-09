@@ -188,6 +188,7 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		printf("camera_selected = %d\n", camera_selected);
 		printf("fov_y = %f\n", camera[camera_selected].fov_y);
+		printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
 		glutPostRedisplay();
 		break;
 	case 'o':					// Zoom out
@@ -199,6 +200,7 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		printf("camera_selected = %d\n", camera_selected);
 		printf("fov_y = %f\n", camera[camera_selected].fov_y);
+		printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
 		glutPostRedisplay();
 		break;
 	case ',':		// Increase zoom factor
@@ -579,7 +581,7 @@ void motion_rotate_naxis(int x, int y) {
 	glm::vec3 vec3_tmp;
 	float delx;
 
-	if (leftbutton_pressed) {
+	if (leftbutton_pressed && view_mode == VIEW_CAMERA) {
 		delx = (float)(x - prevx);
 		prevx = x;
 
@@ -696,8 +698,8 @@ void initialize_camera(void) {
 
 	//camera[3].fov_y = 15.0f;
 	//camera[3].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
-	camera[3].near_clip = 1130.0f;
-	camera[3].far_clip = 1220.0f;
+	camera[3].near_clip = 1130.0f;    // 1200 - (50 + 20)
+	camera[3].far_clip = 1220.0f;     // 1200 + 20
 
 // VIEW_CCTV
 // static cctv 1
