@@ -204,7 +204,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_LIGHT].material[4].exponent = 128.0f*0.4f;
 
 // Added OBJ_LIGHT NO.5 - HK
-	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::translate(glm::mat4(1.0f), glm::vec3(70.0f, 100.0f, 49.0f));
+	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::translate(glm::mat4(1.0f), glm::vec3(80.0f, 100.0f, 49.0f));
 	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::rotate(static_objects[OBJ_LIGHT].ModelMatrix[5],
 		90.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -431,6 +431,61 @@ void draw_axes(int cam_index) {
 	glUniform3fv(loc_primitive_color, 1, axes_color[2]);
 	glDrawArrays(GL_LINES, 4, 2);
 	glBindVertexArray(0);
+}
+
+GLuint VBO_main_camera_axes, VAO_main_camera_axes;
+GLfloat vertices_main_camera_axes[6][3] = {
+	{ 10.0f, 10.0f, 5.0f },{ 11.0f, 10.0f, 5.0f },{ 10.0f, 10.0f, 5.0f },{ 10.0f, 11.0f, 5.0f },
+	{ 10.0f, 10.0f, 5.0f },{ 10.0f, 10.0f, 6.0f }
+	/*
+	{ 100.0f, 100.0f, 50.0f },{ 101.0f, 100.0f, 50.0f },{ 100.0f, 100.0f, 50.0f },{ 100.0f, 101.0f, 50.0f },
+	{ 100.0f, 100.0f, 50.0f },{ 100.0f, 100.0f, 51.0f }
+	*/
+};
+GLfloat main_camera_axes_color[3][3] = { { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } };
+
+void define_main_camera_axes(void) {
+	glGenBuffers(1, &VBO_main_camera_axes);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_main_camera_axes);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_main_camera_axes), &vertices_main_camera_axes[0][0], GL_STATIC_DRAW);
+
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &VAO_main_camera_axes);
+	glBindVertexArray(VAO_main_camera_axes);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_main_camera_axes);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+void draw_main_camera_axes(int cam_index) {
+	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z));
+	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(15.0f, 15.0f, 15.0f));
+
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glBindVertexArray(VAO_axes);
+	glUniform3fv(loc_primitive_color, 1, axes_color[0]);
+	glDrawArrays(GL_LINES, 0, 2);
+	glUniform3fv(loc_primitive_color, 1, axes_color[1]);
+	glDrawArrays(GL_LINES, 2, 2);
+	glUniform3fv(loc_primitive_color, 1, axes_color[2]);
+	glDrawArrays(GL_LINES, 4, 2);
+	glBindVertexArray(0);
+	/*
+	glBindVertexArray(VAO_main_camera_axes);
+	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[0]);
+	glDrawArrays(GL_LINES, 0, 2);
+	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[1]);
+	glDrawArrays(GL_LINES, 2, 2);
+	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[2]);
+	glDrawArrays(GL_LINES, 4, 2);
+	glBindVertexArray(0);
+	*/
 }
 
 #define N_TIGER_FRAMES 12
