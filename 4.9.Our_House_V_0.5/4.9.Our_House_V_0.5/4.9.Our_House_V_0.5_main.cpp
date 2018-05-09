@@ -145,6 +145,7 @@ void motion_translate_naxis(int x, int y);
 void motion_rotate_uaxis(int x, int y);
 void motion_rotate_vaxis(int x, int y);
 void motion_rotate_naxis(int x, int y);
+void motion_1(int x, int y);
 
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
@@ -222,6 +223,10 @@ void keyboard(unsigned char key, int x, int y) {
 
 	case 'c':					// change mode between CAMERA MODE and CCTV MODE
 		view_mode = 1 - view_mode;
+		glutPostRedisplay();
+		break;
+	case 'm':
+		glutMotionFunc(motion_1);
 		glutPostRedisplay();
 		break;
 	/*
@@ -306,30 +311,34 @@ void reshape(int width, int height) {
 	ViewProjectionMatrix[2] = ProjectionMatrix[2] * ViewMatrix[2];
 
 	camera[3].aspect_ratio = camera[0].aspect_ratio;
-	viewport[3].x = (int)(0.70f*width); viewport[3].y = (int)(0.10f*height);
+	viewport[3].x = (int)(0.70f*width); viewport[3].y = (int)(0.05f*height);
 	viewport[3].w = (int)(0.30f*width); viewport[3].h = (int)(0.30*height);
 	ProjectionMatrix[3] = glm::perspective(camera[3].fov_y*TO_RADIAN, camera[3].aspect_ratio, camera[3].near_clip, camera[3].far_clip);
 	ViewProjectionMatrix[3] = ProjectionMatrix[3] * ViewMatrix[3];
 
 // VIEW_CCTV mode
+	// static_cctv_1
 	camera[4].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
-	viewport[4].x = viewport[4].y = 0;
+	viewport[4].x = 0; viewport[4].y = (int)(0.70f*height);
 	viewport[4].w = (int)(0.30f*width); viewport[4].h = (int)(0.30f*height);
 	ProjectionMatrix[4] = glm::perspective(camera[4].fov_y*TO_RADIAN, camera[4].aspect_ratio, camera[4].near_clip, camera[4].far_clip);
 	ViewProjectionMatrix[4] = ProjectionMatrix[4] * ViewMatrix[4];
 
+	// static_cctv_2
 	camera[5].aspect_ratio = camera[4].aspect_ratio;
-	viewport[5].x = 0; viewport[5].y = (int)(0.30f*height);
+	viewport[5].x = 0; viewport[5].y = (int)(0.35f*height);
 	viewport[5].w = (int)(0.30f*width); viewport[5].h = (int)(0.30*height);
 	ProjectionMatrix[5] = glm::perspective(camera[5].fov_y*TO_RADIAN, camera[5].aspect_ratio, camera[5].near_clip, camera[5].far_clip);
 	ViewProjectionMatrix[5] = ProjectionMatrix[5] * ViewMatrix[5];
 
+	// static_cctv_3
 	camera[6].aspect_ratio = camera[4].aspect_ratio;
-	viewport[6].x = 0; viewport[6].y = (int)(0.60f*height);
+	viewport[6].x = 0; viewport[6].y = 0;
 	viewport[6].w = (int)(0.30f*width); viewport[6].h = (int)(0.30*height);
 	ProjectionMatrix[6] = glm::perspective(camera[6].fov_y*TO_RADIAN, camera[6].aspect_ratio, camera[6].near_clip, camera[6].far_clip);
 	ViewProjectionMatrix[6] = ProjectionMatrix[6] * ViewMatrix[6];
 	
+	// dynamic_cctv
 	camera[7].aspect_ratio = camera[4].aspect_ratio;
 	viewport[7].x = (int)(0.30f*width); viewport[7].y = 0;
 	viewport[7].w = (int)(0.70f*width); viewport[7].h = (int)(0.70*height);
@@ -420,6 +429,11 @@ void motion_translate_uaxis(int x, int y) {
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		
+		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+				camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
+				camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
+				camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
 		glutPostRedisplay();
 	}
 }
@@ -442,6 +456,11 @@ void motion_translate_vaxis(int x, int y) {
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+
+		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
+			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
+			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
 		glutPostRedisplay();
 	}
 }
@@ -468,6 +487,11 @@ void motion_translate_naxis(int x, int y) {
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+
+		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
+			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
+			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
 		glutPostRedisplay();
 	}
 }
@@ -493,6 +517,11 @@ void motion_rotate_uaxis(int x, int y) {
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+
+		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
+			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
+			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
 		glutPostRedisplay();
 	}
 }
@@ -516,6 +545,11 @@ void motion_rotate_vaxis(int x, int y) {
 		ViewMatrix[0] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+
+		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
+			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
+			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
 		glutPostRedisplay();
 	}
 }
@@ -540,6 +574,11 @@ void motion_rotate_naxis(int x, int y) {
 		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+
+		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
+			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
+			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
 		glutPostRedisplay();
 	}
 }
@@ -580,8 +619,7 @@ void initialize_camera(void) {
 	camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
 	camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
 	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
-	//u,v,n벡터를 lookAt으로 세팅
-	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup);
+	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup); //u,v,n벡터를 lookAt으로 세팅
 	//camera[0].vup = glm::vec3(ViewMatrix[0][0].y, ViewMatrix[0][1].y, ViewMatrix[0][2].y); // in this example code, make vup always equal to the v direction.
 
 //	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
@@ -633,9 +671,9 @@ void initialize_camera(void) {
 
 // VIEW_CCTV
 // static cctv 1
-	camera[4].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
-	camera[4].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
-	camera[4].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+	camera[4].prp = glm::vec3(-8.0f, 94.0f, 50.0f);	// 카메라 위치
+	camera[4].vrp = glm::vec3(695.0f, 133.0f, -103.0f);		// 바라보는 곳
+	camera[4].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[4] = glm::lookAt(camera[4].prp, camera[4].vrp, camera[4].vup);
 
@@ -645,9 +683,9 @@ void initialize_camera(void) {
 	camera[4].far_clip = 10000.0f;
 
 // static cctv 2
-	camera[5].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
-	camera[5].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
-	camera[5].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+	camera[5].prp = glm::vec3(240.0f, 40.0f, 50.0f);	// 카메라 위치
+	camera[5].vrp = glm::vec3(-480.0f, 42.0f, -41.0f);		// 바라보는 곳
+	camera[5].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[5] = glm::lookAt(camera[5].prp, camera[5].vrp, camera[5].vup);
 
@@ -657,9 +695,9 @@ void initialize_camera(void) {
 	camera[5].far_clip = 10000.0f;
 
 // static cctv 3
-	camera[6].prp = glm::vec3(120.0f, 90.0f, 1000.0f);	// 카메라 위치
-	camera[6].vrp = glm::vec3(120.0f, 90.0f, 0.0f);		// 바라보는 곳
-	camera[6].vup = glm::vec3(-10.0f, 0.0f, 0.0f);
+	camera[6].prp = glm::vec3(96.0f, 337.0f, 50.0f);	// 카메라 위치
+	camera[6].vrp = glm::vec3(77.0f, -379.0f, -50.0f);		// 바라보는 곳
+	camera[6].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	ViewMatrix[6] = glm::lookAt(camera[6].prp, camera[6].vrp, camera[6].vup);
 
