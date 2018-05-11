@@ -252,7 +252,7 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 
-	case 'c':					// change mode between CAMERA MODE and CCTV MODE
+	case 's':					// change mode between CAMERA MODE and CCTV MODE
 		camera_selected = 7-camera_selected;
 		view_mode = 1 - view_mode;
 		glutPostRedisplay();
@@ -261,7 +261,7 @@ void keyboard(unsigned char key, int x, int y) {
 		glutMotionFunc(motion_1);
 		glutPostRedisplay();
 		break;
-	/*
+
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -284,7 +284,7 @@ void keyboard(unsigned char key, int x, int y) {
 			break;
 		}
 		break;
-	*/
+
 	case 'f':
 		polygon_fill_on = 1 - polygon_fill_on;
 		if (polygon_fill_on) {
