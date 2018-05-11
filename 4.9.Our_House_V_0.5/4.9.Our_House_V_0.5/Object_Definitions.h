@@ -433,30 +433,61 @@ void draw_axes(int cam_index) {
 	glBindVertexArray(0);
 }
 
-GLuint VBO_main_camera_axes, VAO_main_camera_axes;
-GLfloat vertices_main_camera_axes[6][3] = {
-	{ 10.0f, 10.0f, 5.0f },{ 11.0f, 10.0f, 5.0f },{ 10.0f, 10.0f, 5.0f },{ 10.0f, 11.0f, 5.0f },
-	{ 10.0f, 10.0f, 5.0f },{ 10.0f, 10.0f, 6.0f }
+// /*
+
+GLuint VBO_frustum, VAO_frustum;
+GLfloat vertices_frustum[8][3] = {
+	{ -1.0f, -1.0f, -1.0f},{ 1.0f, -1.0f, -1.0f},{ 1.0f, 1.0f, -1.0f},{ -1.0f, 1.0f, -1.0f},
+	{ -1.0f, -1.0f, 1.0f},{ 1.0f, -1.0f, 1.0f},{ 1.0f, 1.0f, 1.0f},{ -1.0f, 1.0f, 1.0f}
 };
-GLfloat main_camera_axes_color[3][3] = { { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } };
+GLfloat frustum_color[2][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f } }; // yellow, magenta
 
-void define_main_camera_axes(void) {
-	glGenBuffers(1, &VBO_main_camera_axes);
+void define_frustum(void) {
+	glGenBuffers(1, &VBO_frustum);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_main_camera_axes);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_main_camera_axes), &vertices_main_camera_axes[0][0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_frustum), &vertices_frustum[0][0], GL_STATIC_DRAW);
 
 	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_main_camera_axes);
-	glBindVertexArray(VAO_main_camera_axes);
+	glGenVertexArrays(1, &VAO_frustum);
+	glBindVertexArray(VAO_frustum);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_main_camera_axes);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
+
+#define WC_FRUSTUM_LENGTH		100.0f
+void draw_frustum(int cam_index) {
+	/*
+	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_AXIS_LENGTH, WC_AXIS_LENGTH, WC_AXIS_LENGTH));
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
+	glm::mat4 InverseMatrix_PV = glm::inverse(ProjectionMatrix[cam_index] * ViewMatrix[cam_index]);
+	*/
+	glm::mat4 InverseMatrix_PV = glm::inverse(ProjectionMatrix[cam_index] * ViewMatrix[cam_index]);
+	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
+	ModelViewProjectionMatrix = InverseMatrix_PV * ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ViewMatrix[cam_index] * ModelViewProjectionMatrix;
+	/*
+	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
+	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
+	*/
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glBindVertexArray(VAO_frustum);
+	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
+	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
+	glBindVertexArray(0);
+
+}
+
+// */
+
 void draw_main_camera_axes(int cam_index) {
 	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
@@ -475,17 +506,6 @@ void draw_main_camera_axes(int cam_index) {
 	glUniform3fv(loc_primitive_color, 1, axes_color[2]);
 	glDrawArrays(GL_LINES, 4, 2);
 	glBindVertexArray(0);
-
-	/*
-	glBindVertexArray(VAO_main_camera_axes);
-	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[0]);
-	glDrawArrays(GL_LINES, 0, 2);
-	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[1]);
-	glDrawArrays(GL_LINES, 2, 2);
-	glUniform3fv(loc_primitive_color, 1, main_camera_axes_color[2]);
-	glDrawArrays(GL_LINES, 4, 2);
-	glBindVertexArray(0);
-	*/
 }
 
 

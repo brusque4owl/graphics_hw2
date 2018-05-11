@@ -72,6 +72,7 @@ void display_camera(int cam_index){ // display()함수로 인해 매초마다 불러짐.
 		glLineWidth(2.0f);
 		draw_axes(cam_index);
 		draw_main_camera_axes(cam_index);
+		draw_frustum(cam_index);
 		glLineWidth(1.0f);
 
 		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
@@ -823,7 +824,7 @@ void initialize_OpenGL(void) {
 
 void prepare_scene(void) {
 	define_axes();
-	define_main_camera_axes();
+	define_frustum();
 	define_static_objects();
 	define_animated_tiger();
 }
