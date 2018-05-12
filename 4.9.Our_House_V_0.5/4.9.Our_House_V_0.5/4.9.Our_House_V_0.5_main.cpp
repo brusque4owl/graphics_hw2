@@ -31,9 +31,10 @@ typedef struct {
 	float left, right, bottom, top;
 	glm::vec3 uaxis, vaxis, naxis;
 } CAMERA;
+
 CAMERA camera[NUMBER_OF_CAMERAS];
-glm::vec3 init_camera_vup;
 glm::mat4 mat_rotate = glm::mat4(1.0f);
+glm::vec3 init_camera_vup;
 float angle_rotate_u = 0.0f;
 float angle_rotate_v = 0.0f;
 float angle_rotate_n = 0.0f;
@@ -201,6 +202,8 @@ void keyboard(unsigned char key, int x, int y) {
 		printf("camera_selected = %d\n", camera_selected);
 		printf("fov_y = %f\n", camera[camera_selected].fov_y);
 		printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
+
+		define_frustum_line(); 	// change viewing volume with fov_y
 		glutPostRedisplay();
 		break;
 	case 'o':					// Zoom out
@@ -213,6 +216,8 @@ void keyboard(unsigned char key, int x, int y) {
 		printf("camera_selected = %d\n", camera_selected);
 		printf("fov_y = %f\n", camera[camera_selected].fov_y);
 		printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
+
+		define_frustum_line();	// change viewing volume with fov_y
 		glutPostRedisplay();
 		break;
 	case ',':		// Increase zoom factor
@@ -229,14 +234,20 @@ void keyboard(unsigned char key, int x, int y) {
 	case '/':		// Initialize main_camera or dynamic_cctv
 		switch(view_mode){
 			case VIEW_CAMERA:
+				/*
 				camera[0].prp = glm::vec3(202.0f, 38.0f, 14.0f);	// 카메라 위치
 				camera[0].vrp = glm::vec3(197.0f, 86.0f, 13.0f);		// 바라보는 곳
+				*/
+				camera[0].prp = glm::vec3(212.778366f, 163.684006f, 11.367419f);		// 카메라 위치
+				camera[0].vrp = glm::vec3(212.100739f, 115.430161f, 12.360538f);		// 바라보는 곳
 				camera[0].vup = init_camera_vup;
-				camera[camera_selected].fov_y = 50.0f;
+				camera[camera_selected].fov_y = 30.0f;
 				angle_rotate_u = 0.0f;
 				angle_rotate_v = 0.0f;
+				angle_rotate_n = 0.0f;
 				rotate_axis_u = glm::vec3(0.0f, 0.0f, 1.0f);
 				rotate_axis_v = glm::vec3(0.0f, 0.0f, 1.0f);
+				rotate_axis_n = glm::vec3(0.0f, 0.0f, 1.0f);
 				break;
 
 			case VIEW_CCTV:
@@ -653,8 +664,13 @@ void prepare_shader_program(void) {
 
 void initialize_camera(void) {
 	// initialize the 0th camera.
+	/*
 	camera[0].prp = glm::vec3(202.0f, 38.0f, 14.0f);		// 카메라 위치
 	camera[0].vrp = glm::vec3(197.0f, 86.0f, 13.0f);		// 바라보는 곳
+	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+	*/
+	camera[0].prp = glm::vec3(212.778366f, 163.684006f, 11.367419f);		// 카메라 위치
+	camera[0].vrp = glm::vec3(212.100739f, 115.430161f, 12.360538f);		// 바라보는 곳
 	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	glm::vec3 uaxis, vaxis, naxis;
