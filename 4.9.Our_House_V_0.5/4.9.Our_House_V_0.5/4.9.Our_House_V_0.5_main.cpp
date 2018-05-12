@@ -29,6 +29,7 @@ typedef struct {
 	glm::vec3 prp, vrp, vup; // in this example code, make vup always equal to the v direction.
 	float fov_y, aspect_ratio, near_clip, far_clip, zoom_factor;
 	float left, right, bottom, top;
+	glm::vec3 uaxis, vaxis, naxis;
 } CAMERA;
 CAMERA camera[NUMBER_OF_CAMERAS];
 glm::vec3 init_camera_vup;
@@ -72,7 +73,8 @@ void display_camera(int cam_index){ // display()함수로 인해 매초마다 불러짐.
 		glLineWidth(2.0f);
 		draw_axes(cam_index);
 		draw_main_camera_axes(cam_index);
-		draw_frustum(cam_index);
+		//draw_frustum(cam_index);
+		draw_frustum_line(cam_index);
 		glLineWidth(1.0f);
 
 		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
@@ -313,19 +315,10 @@ void keyboard(unsigned char key, int x, int y) {
 	}
 }
 
-/* 원본 reshape
-void reshape(int width, int height) {
-	float aspect_ratio;
-	aspect_ratio = (float)width / height;
-	glViewport(0, 0, width, height);   -> display_camera()에서 처리
-	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
-
-	glutPostRedisplay();
-}
-*/
 void reshape(int width, int height) {
 // VIEW_CAMERA mode
 	camera[0].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
+	//printf("aspect_ratio = %f\n\n", camera[0].aspect_ratio);
 	viewport[0].x = viewport[0].y = 0;
 	viewport[0].w = (int)(0.70f*width); viewport[0].h = (int)(0.70f*height);
 	ProjectionMatrix[0] = glm::perspective(camera[0].fov_y*TO_RADIAN, camera[0].aspect_ratio, camera[0].near_clip, camera[0].far_clip);
@@ -446,7 +439,7 @@ void motion_translate_uaxis(int x, int y) {
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
 	glm::vec3 vec3_unit_uaxis;
-	float sqrt_vector;
+	//float sqrt_vector;
 	float delx;
 
 	if (leftbutton_pressed && view_mode == VIEW_CAMERA) {
@@ -454,8 +447,9 @@ void motion_translate_uaxis(int x, int y) {
 		prevx = x;
 
 		vec3_tmp = glm::cross(camera[camera_selected].vup, camera[camera_selected].prp - camera[camera_selected].vrp);
-		sqrt_vector = sqrt((vec3_tmp.x*vec3_tmp.x) + (vec3_tmp.y*vec3_tmp.y) + (vec3_tmp.z*vec3_tmp.z));
-		vec3_unit_uaxis = glm::vec3( vec3_tmp.x / sqrt_vector, vec3_tmp.y / sqrt_vector, vec3_tmp.z / sqrt_vector);
+		//sqrt_vector = sqrt((vec3_tmp.x*vec3_tmp.x) + (vec3_tmp.y*vec3_tmp.y) + (vec3_tmp.z*vec3_tmp.z));
+		//vec3_unit_uaxis = glm::vec3( vec3_tmp.x / sqrt_vector, vec3_tmp.y / sqrt_vector, vec3_tmp.z / sqrt_vector);
+		vec3_unit_uaxis = glm::normalize(vec3_tmp);
 		mat4_tmp = glm::translate(glm::mat4(1.0f), delx*vec3_unit_uaxis);
 
 		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
@@ -504,7 +498,7 @@ void motion_translate_naxis(int x, int y) {
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
 	glm::vec3 vec3_unit_naxis;
-	float sqrt_vector;
+	//float sqrt_vector;
 	float dely;
 
 	if (leftbutton_pressed && view_mode == VIEW_CAMERA) {
@@ -512,8 +506,9 @@ void motion_translate_naxis(int x, int y) {
 		prevy = y;
 
 		vec3_tmp = camera[camera_selected].prp - camera[camera_selected].vrp;			// prp-vrp = n벡터  <- 이 모든건 카메라 축 기준
-		sqrt_vector = sqrt((vec3_tmp.x*vec3_tmp.x) + (vec3_tmp.y*vec3_tmp.y) + (vec3_tmp.z*vec3_tmp.z));
-		vec3_unit_naxis = glm::vec3(vec3_tmp.x / sqrt_vector, vec3_tmp.y / sqrt_vector, vec3_tmp.z / sqrt_vector);
+		//sqrt_vector = sqrt((vec3_tmp.x*vec3_tmp.x) + (vec3_tmp.y*vec3_tmp.y) + (vec3_tmp.z*vec3_tmp.z));
+		//vec3_unit_naxis = glm::vec3(vec3_tmp.x / sqrt_vector, vec3_tmp.y / sqrt_vector, vec3_tmp.z / sqrt_vector);
+		vec3_unit_naxis = glm::normalize(vec3_tmp);
 		mat4_tmp = glm::translate(glm::mat4(1.0f), -dely * vec3_unit_naxis);
 
 		camera[camera_selected].prp = glm::vec3(mat4_tmp*glm::vec4(camera[camera_selected].prp, 1.0f));	// affine transformation of point (x,y,z,1)
@@ -658,40 +653,37 @@ void prepare_shader_program(void) {
 }
 
 void initialize_camera(void) {
-// example 4.5.3을 이용하여 camera세팅
-/*	주어진 lootAt함수 파라미터
-	lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
-	glm::vec3(0.0f, 0.0f, 1.0f));	// 각각 PRP, VRP, VUP
-*/
 	// initialize the 0th camera.
-/*
-	camera[0].prp = glm::vec3(600.0f, 600.0f, 200.0f);	// 카메라 위치
-	camera[0].vrp = glm::vec3(125.0f, 80.0f, 25.0f);		// 바라보는 곳
-	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
-*/
-	camera[0].prp = glm::vec3(202.0f, 38.0f, 14.0f);	// 카메라 위치
+	camera[0].prp = glm::vec3(202.0f, 38.0f, 14.0f);		// 카메라 위치
 	camera[0].vrp = glm::vec3(197.0f, 86.0f, 13.0f);		// 바라보는 곳
 	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	glm::vec3 uaxis, vaxis, naxis;
 	naxis = camera[0].prp - camera[0].vrp;
-	uaxis = glm::cross(camera[0].vup, naxis);
-	vaxis = glm::cross(naxis, uaxis);
+	naxis = glm::normalize(naxis);
 
-	float sqrt_vector;
-	sqrt_vector = sqrt((vaxis.x*vaxis.x) + (vaxis.y*vaxis.y) + (vaxis.z*vaxis.z));
-	vaxis = glm::vec3(vaxis.x / sqrt_vector, vaxis.y / sqrt_vector, vaxis.z / sqrt_vector);
+	uaxis = glm::cross(camera[0].vup, naxis);
+	uaxis = glm::normalize(uaxis);
+
+	vaxis = glm::cross(naxis, uaxis);
+	vaxis = glm::normalize(vaxis);
+
 	init_camera_vup = camera[0].vup = vaxis;
 
+	//uaxis = glm::cross(camera[camera_selected].vup, camera[camera_selected].prp - camera[camera_selected].vrp);
+	//uaxis = glm::normalize(uaxis);
+	camera[0].uaxis = uaxis;
+	camera[0].vaxis = vaxis;
+	camera[0].naxis = naxis;
 	printf("vup.x = %f\tvup.y = %f\tvup.z = %f\n\n",vaxis.x,vaxis.y,vaxis.z);
 
 	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup); //u,v,n벡터를 lookAt으로 세팅
 
 //	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
 	camera[0].fov_y = 50.0f;
-	camera[0].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
 	camera[0].near_clip = 1.0f;
-	camera[0].far_clip = 10000.0f;
+	camera[0].far_clip = 1000.0f;
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
 //initialize the 1st camera. used for front_view
@@ -707,10 +699,11 @@ void initialize_camera(void) {
 
 	//camera[1].fov_y = 15.0f;
 	//camera[1].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
-	camera[1].near_clip = 60.0f;
-	camera[1].far_clip = 400.0f;
+	camera[1].near_clip = 10.0f;
+	camera[1].far_clip = 600.0f;
 
 //initialize the 2nd camera used for side_view
+	
 	camera[2].prp = glm::vec3(230.0f, 230.0f, 0.0f);	// 카메라 위치
 	camera[2].vrp = glm::vec3(230.0f, 0.0f, 0.0f);		// 바라보는 곳
 	camera[2].vup = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -720,12 +713,26 @@ void initialize_camera(void) {
 	camera[2].right = 270.0f; // 230 + 40
 	camera[2].bottom =-20.0f; // 0 - 20
 	camera[2].top = 70.0f;	  // 50 + 20
+	
+	/*
+	camera[2].prp = glm::vec3(0.0f, -100.0f, 0.0f);	// 카메라 위치
+	camera[2].vrp = glm::vec3(0.0f, 230.0f, 0.0f);		// 바라보는 곳
+	camera[2].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+	ViewMatrix[2] = glm::lookAt(camera[2].prp, camera[2].vrp, camera[2].vup);
 
+	camera[2].left = -40.0f;  // prp를 (0,0,0)으로 놓고 계산한 값
+	camera[2].right = 270.0f; // 230 + 40
+	camera[2].bottom = -20.0f; // 0 - 20
+	camera[2].top = 70.0f;	  // 50 + 20
+	*/
 	//camera[2].fov_y = 15.0f;
 	//camera[2].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
+	camera[2].near_clip = 10.0f;
+	camera[2].far_clip = 600.0f;
+	/*
 	camera[2].near_clip = 60.0f;
 	camera[2].far_clip = 400.0f;
-
+	*/
 //initialize the 3rd camera used for top_view
 	camera[3].prp = glm::vec3(230.0f, 0.0f, 1200.0f);	// 카메라 위치
 	camera[3].vrp = glm::vec3(230.0f, 0.0f, 0.0f);		// 바라보는 곳
@@ -825,6 +832,7 @@ void initialize_OpenGL(void) {
 void prepare_scene(void) {
 	define_axes();
 	define_frustum();
+	define_frustum_line();
 	define_static_objects();
 	define_animated_tiger();
 }
