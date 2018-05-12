@@ -57,7 +57,7 @@ int read_geometry(GLfloat **object, int bytes_per_primitive, char *filename) {
 		exit(EXIT_FAILURE);
 	}
 	fread(*object, bytes_per_primitive, n_triangles, fp); // assume the data file has no faults.
-	// fprintf(stdout, "Read %d primitives successfully.\n\n", n_triangles);
+														  // fprintf(stdout, "Read %d primitives successfully.\n\n", n_triangles);
 	fclose(fp);
 
 	return n_triangles;
@@ -66,7 +66,7 @@ int read_geometry(GLfloat **object, int bytes_per_primitive, char *filename) {
 void compute_AABB(Object *obj_ptr) {
 	// Do it yourself.
 }
-	 
+
 void prepare_geom_of_static_object(Object *obj_ptr) {
 	int i, n_bytes_per_vertex, n_bytes_per_triangle;
 	char filename[512];
@@ -107,8 +107,8 @@ void define_static_objects(void) {
 
 	static_objects[OBJ_BUILDING].n_geom_instances = 1;
 
-    static_objects[OBJ_BUILDING].ModelMatrix[0] = glm::mat4(1.0f);
-	
+	static_objects[OBJ_BUILDING].ModelMatrix[0] = glm::mat4(1.0f);
+
 	static_objects[OBJ_BUILDING].material[0].emission = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	static_objects[OBJ_BUILDING].material[0].ambient = glm::vec4(0.135f, 0.2225f, 0.1575f, 1.0f);
 	static_objects[OBJ_BUILDING].material[0].diffuse = glm::vec4(0.54f, 0.89f, 0.63f, 1.0f);
@@ -135,7 +135,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_TABLE].material[0].exponent = 128.0f*0.078125f;
 
 	static_objects[OBJ_TABLE].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(157.0f, 76.5f, 0.0f));
-	static_objects[OBJ_TABLE].ModelMatrix[1] = glm::scale(static_objects[OBJ_TABLE].ModelMatrix[1], 
+	static_objects[OBJ_TABLE].ModelMatrix[1] = glm::scale(static_objects[OBJ_TABLE].ModelMatrix[1],
 		glm::vec3(0.5f, 0.5f, 0.5f));
 
 	static_objects[OBJ_TABLE].material[1].emission = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -203,7 +203,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_LIGHT].material[4].specular = glm::vec4(0.628281f, 0.555802f, 0.366065f, 1.0f);
 	static_objects[OBJ_LIGHT].material[4].exponent = 128.0f*0.4f;
 
-// Added OBJ_LIGHT NO.5 - HK
+	// Added OBJ_LIGHT NO.5 - HK
 	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::translate(glm::mat4(1.0f), glm::vec3(80.0f, 100.0f, 49.0f));
 	static_objects[OBJ_LIGHT].ModelMatrix[5] = glm::rotate(static_objects[OBJ_LIGHT].ModelMatrix[5],
 		90.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -233,7 +233,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_TEAPOT].material[0].specular = glm::vec4(0.727811f, 0.626959f, 0.626959f, 1.0f);
 	static_objects[OBJ_TEAPOT].material[0].exponent = 128.0f*0.6;
 
-// Added OBJ_TEAPOT NO.1 - HK
+	// Added OBJ_TEAPOT NO.1 - HK
 	//vec3(157.0f, 76.5f, 0.0f) - OBJ_TABLE NO.1
 	static_objects[OBJ_TEAPOT].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(35.0f, 50.0f, 12.0f));
 	static_objects[OBJ_TEAPOT].ModelMatrix[1] = glm::scale(static_objects[OBJ_TEAPOT].ModelMatrix[1],
@@ -266,7 +266,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_NEW_CHAIR].material[0].specular = glm::vec4(0.7f, 0.7f, 0.04f, 1.0f);
 	static_objects[OBJ_NEW_CHAIR].material[0].exponent = 128.0f*0.078125f;
 
-// Added OBJ_NEW_CHAIR NO.1 - HK
+	// Added OBJ_NEW_CHAIR NO.1 - HK
 	static_objects[OBJ_NEW_CHAIR].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(30.0f, 52.0f, 0.0f));
 	static_objects[OBJ_NEW_CHAIR].ModelMatrix[1] = glm::scale(static_objects[OBJ_NEW_CHAIR].ModelMatrix[1],
 		glm::vec3(1.2f, 1.2f, 1.2f));
@@ -300,7 +300,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_FRAME].material[0].specular = glm::vec4(0.256777f, 0.137622f, 0.086014f, 1.0f);
 	static_objects[OBJ_FRAME].material[0].exponent = 128.0f*0.1f;
 
-// Added OBJ_FRAME NO.1 - HK
+	// Added OBJ_FRAME NO.1 - HK
 	static_objects[OBJ_FRAME].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(25.0f, 20.0f, 30.0f));
 	static_objects[OBJ_FRAME].ModelMatrix[1] = glm::scale(static_objects[OBJ_FRAME].ModelMatrix[1],
 		glm::vec3(0.6f, 0.6f, 0.6f));
@@ -328,7 +328,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_NEW_PICTURE].ModelMatrix[0] = glm::scale(static_objects[OBJ_NEW_PICTURE].ModelMatrix[0],
 		glm::vec3(13.5f*0.6f, 13.5f*0.6f, 13.5f*0.6f));
 	static_objects[OBJ_NEW_PICTURE].ModelMatrix[0] = glm::rotate(static_objects[OBJ_NEW_PICTURE].ModelMatrix[0],
-		 90.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+		90.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	static_objects[OBJ_NEW_PICTURE].material[0].emission = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	static_objects[OBJ_NEW_PICTURE].material[0].ambient = glm::vec4(0.25f, 0.25f, 0.25f, 1.0f);
@@ -336,7 +336,7 @@ void define_static_objects(void) {
 	static_objects[OBJ_NEW_PICTURE].material[0].specular = glm::vec4(0.774597f, 0.774597f, 0.774597f, 1.0f);
 	static_objects[OBJ_NEW_PICTURE].material[0].exponent = 128.0f*0.6f;
 
-// Added OBJ_NEW_PICTURE NO.1 - HK
+	// Added OBJ_NEW_PICTURE NO.1 - HK
 	// OBJ_FRAME 1 - (25.0f, 15.0f, 30.0f)
 	static_objects[OBJ_NEW_PICTURE].ModelMatrix[1] = glm::translate(glm::mat4(1.0f), glm::vec3(26.5f, 20.0f, 30.0f));
 	static_objects[OBJ_NEW_PICTURE].ModelMatrix[1] = glm::scale(static_objects[OBJ_NEW_PICTURE].ModelMatrix[1],
@@ -368,7 +368,7 @@ void define_static_objects(void) {
 		90.0f*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	static_objects[OBJ_COW].ModelMatrix[0] = glm::rotate(static_objects[OBJ_COW].ModelMatrix[0],
 		90.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
- 
+
 	static_objects[OBJ_COW].material[0].emission = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	static_objects[OBJ_COW].material[0].ambient = glm::vec4(0.329412f, 0.223529f, 0.027451f, 1.0f);
 	static_objects[OBJ_COW].material[0].diffuse = glm::vec4(0.780392f, 0.568627f, 0.113725f, 1.0f);
@@ -395,11 +395,11 @@ void draw_static_object(Object *obj_ptr, int instance_ID, int cam_index) {
 GLuint VBO_axes, VAO_axes;
 GLfloat vertices_axes[6][3] = {
 	{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },
-	{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 1.0f }
+{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 1.0f }
 };
 GLfloat axes_color[3][3] = { { 1.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } };
 
-void define_axes(void) {  
+void define_axes(void) {
 	glGenBuffers(1, &VBO_axes);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_axes);
@@ -433,84 +433,15 @@ void draw_axes(int cam_index) {
 	glBindVertexArray(0);
 }
 
-// /*  // START OF FRUSTUM
-
-GLuint VBO_frustum, VAO_frustum;
-GLfloat vertices_frustum[8][3] = {
-	{ -1.0f, -1.0f, -1.0f},{ 1.0f, -1.0f, -1.0f},{ 1.0f, 1.0f, -1.0f},{ -1.0f, 1.0f, -1.0f},
-	{ -1.0f, -1.0f, 1.0f},{ 1.0f, -1.0f, 1.0f},{ 1.0f, 1.0f, 1.0f},{ -1.0f, 1.0f, 1.0f}
-};
-GLfloat frustum_color[2][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f } }; // yellow, magenta
-
-void define_frustum(void) {
-	glGenBuffers(1, &VBO_frustum);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_frustum), &vertices_frustum[0][0], GL_STATIC_DRAW);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_frustum);
-	glBindVertexArray(VAO_frustum);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-#define WC_FRUSTUM_LENGTH		5.0f
-void draw_frustum(int cam_index) {
-
-	/*
-	glm::mat4 InverseMatrix_PV = glm::inverse(ProjectionMatrix[cam_index] * ViewMatrix[cam_index]);
-	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
-	ModelViewProjectionMatrix = InverseMatrix_PV * ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
-	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ViewMatrix[cam_index] * ModelViewProjectionMatrix;
-	*/
-	
-	glm::mat4 InverseMatrix_PV = glm::inverse(ProjectionMatrix[cam_index] * ViewMatrix[cam_index]);
-	//ModelViewMatrix[cam_index] = glm::rotate(ViewMatrix[cam_index], 90.0f * TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
-	//ModelViewMatrix[cam_index] = glm::translate(ModelViewMatrix[cam_index], camera[camera_selected].prp);
-
-	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
-	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
-	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);
-	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_n, rotate_axis_n);
-	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
-
-	ModelViewProjectionMatrix = InverseMatrix_PV * ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
-	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ViewMatrix[cam_index] * ModelViewProjectionMatrix;
-	/*
-	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
-	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
-	*/
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-
-	glBindVertexArray(VAO_frustum);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 0, 2);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 2, 2);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 4, 2);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 6, 2);
-	glBindVertexArray(0);
-}
-// */	// END OF FRUSTUM
-
 
 // /*   // START OF FRUSTUM LINE
-
 GLuint VBO_frustum_line, VAO_frustum_line;
 /*
 GLfloat Hfar = 2.0f * (tan(camera[0].fov_y/2.0f) * camera[0].far_clip);
 GLfloat Wfar = Hfar * camera[0].aspect_ratio;
 glm::vec3 ftl = camera[0].far_clip * glm::vec3(0.0f,0.0f,-1.0f) + (glm::vec3(0.0f, 1.0f, 0.0f) * (Hfar / 2.0f)) - (glm::vec3(1.0f, 0.0f, 0.0f) * (Wfar / 2.0f));
 GLfloat vertices_frustum_line[2][3] = {
-	{ 0.0f, 0.0f, 0.0f },{ftl.x,ftl.y,ftl.z}
+{ 0.0f, 0.0f, 0.0f },{ftl.x,ftl.y,ftl.z}
 };
 */
 GLfloat frustum_line_color[4][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f, 1.0f } }; // yellow, magenta
@@ -518,26 +449,36 @@ GLfloat frustum_line_color[4][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f },{
 void define_frustum_line(void) {
 	printf("camera[0].far_clip = %f\t camera[0].fov_y = %f\t camera[0].aspect_ratio = %f\n\n", camera[0].far_clip, camera[0].fov_y, camera[0].aspect_ratio);
 
+	GLfloat Hnear = 2.0f * (tan(camera[0].fov_y *TO_RADIAN / 2.0f) * camera[0].near_clip);
+	GLfloat Wnear = Hnear * camera[0].aspect_ratio;
 	GLfloat Hfar = 2.0f * (tan(camera[0].fov_y *TO_RADIAN / 2.0f) * camera[0].far_clip);
 	GLfloat Wfar = Hfar * camera[0].aspect_ratio;
+
+	glm::vec3 ntl_1 = camera[0].near_clip * -camera[0].naxis + (camera[0].vaxis * (Hnear / 2.0f)) + (-camera[0].uaxis * (Wnear / 2.0f));
+	glm::vec3 ntl_2 = camera[0].near_clip * -camera[0].naxis + (camera[0].vaxis * (Hnear / 2.0f)) + (camera[0].uaxis * (Wnear / 2.0f));
+	glm::vec3 ntl_3 = camera[0].near_clip * -camera[0].naxis + (-camera[0].vaxis * (Hnear / 2.0f)) + (-camera[0].uaxis * (Wnear / 2.0f));
+	glm::vec3 ntl_4 = camera[0].near_clip * -camera[0].naxis + (-camera[0].vaxis * (Hnear / 2.0f)) + (camera[0].uaxis * (Wnear / 2.0f));
+
 	glm::vec3 ftl_1 = camera[0].far_clip * -camera[0].naxis + (camera[0].vaxis * (Hfar / 2.0f)) + (-camera[0].uaxis * (Wfar / 2.0f));     // up-left    - yellow
 	glm::vec3 ftl_2 = camera[0].far_clip * -camera[0].naxis + (camera[0].vaxis * (Hfar / 2.0f)) + (camera[0].uaxis * (Wfar / 2.0f));      // up-right   - magenta
 	glm::vec3 ftl_3 = camera[0].far_clip * -camera[0].naxis + (-camera[0].vaxis * (Hfar / 2.0f)) + (-camera[0].uaxis * (Wfar / 2.0f));	  // down-left  - white
 	glm::vec3 ftl_4 = camera[0].far_clip * -camera[0].naxis + (-camera[0].vaxis * (Hfar / 2.0f)) + (camera[0].uaxis * (Wfar / 2.0f));     // down-right - cyan
-	GLfloat vertices_frustum_line[12][3] = {
+	GLfloat vertices_frustum_line[16][3] = {
 		{ 0.0f, 0.0f, 0.0f },{ ftl_1.x,ftl_1.y,ftl_1.z },
-		{ 0.0f, 0.0f, 0.0f },{ ftl_2.x,ftl_2.y,ftl_2.z },
-		{ 0.0f, 0.0f, 0.0f },{ ftl_3.x,ftl_3.y,ftl_3.z },
-		{ 0.0f, 0.0f, 0.0f },{ ftl_4.x,ftl_4.y,ftl_4.z },
-		//far plane
-		{ ftl_1.x,ftl_1.y,ftl_1.z },{ ftl_3.x,ftl_3.y,ftl_3.z },{ ftl_4.x,ftl_4.y,ftl_4.z }, { ftl_2.x,ftl_2.y,ftl_2.z }
-		
+	{ 0.0f, 0.0f, 0.0f },{ ftl_2.x,ftl_2.y,ftl_2.z },
+	{ 0.0f, 0.0f, 0.0f },{ ftl_3.x,ftl_3.y,ftl_3.z },
+	{ 0.0f, 0.0f, 0.0f },{ ftl_4.x,ftl_4.y,ftl_4.z },
+	//far plane
+	{ ftl_1.x,ftl_1.y,ftl_1.z },{ ftl_3.x,ftl_3.y,ftl_3.z },{ ftl_4.x,ftl_4.y,ftl_4.z },{ ftl_2.x,ftl_2.y,ftl_2.z },
+	//near plane
+	{ ntl_1.x,ntl_1.y,ntl_1.z },{ ntl_3.x,ntl_3.y,ntl_3.z },{ ntl_4.x,ntl_4.y,ntl_4.z },{ ntl_2.x,ntl_2.y,ntl_2.z }
 	};
-
+	/*
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_1.x, ftl_1.y, ftl_1.z, frustum_line_color[0][0], frustum_line_color[0][1], frustum_line_color[0][2]);
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_2.x, ftl_2.y, ftl_2.z, frustum_line_color[1][0], frustum_line_color[1][1], frustum_line_color[1][2]);
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_3.x, ftl_3.y, ftl_3.z, frustum_line_color[2][0], frustum_line_color[2][1], frustum_line_color[2][2]);
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_4.x, ftl_4.y, ftl_4.z, frustum_line_color[3][0], frustum_line_color[3][1], frustum_line_color[3][2]);
+	*/
 	glGenBuffers(1, &VBO_frustum_line);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum_line);
@@ -558,13 +499,13 @@ void define_frustum_line(void) {
 #define WC_FRUSTUM_LINE_LENGTH		1.0f
 void draw_frustum_line(int cam_index) {
 
-	if(cam_index==0) return;
+	if (cam_index == 0) return;
 	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_n, rotate_axis_n);
 	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH));
-	
+
 	//ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH));
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -582,6 +523,9 @@ void draw_frustum_line(int cam_index) {
 	// far plane
 	glUniform3fv(loc_primitive_color, 1, frustum_line_color[1]);
 	glDrawArrays(GL_LINE_LOOP, 8, 4);
+	// near plane
+	glUniform3fv(loc_primitive_color, 1, frustum_line_color[1]);
+	glDrawArrays(GL_LINE_LOOP, 12, 4);
 
 	glBindVertexArray(0);
 }
@@ -592,7 +536,7 @@ void draw_main_camera_axes(int cam_index) {
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_n, rotate_axis_n);
-	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(15.0f, 15.0f, 15.0f));
+	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(15.0f, -15.0f, 15.0f));
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
@@ -637,8 +581,8 @@ void define_animated_tiger(void) {
 
 void draw_animated_tiger(int cam_index) {
 	ModelViewMatrix[cam_index] = glm::rotate(ViewMatrix[cam_index], -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
- 	ModelViewMatrix[cam_index] = glm::translate(ModelViewMatrix[cam_index], glm::vec3(100.0f, 0.0f, 0.0f));
- 	ModelViewMatrix[cam_index] *= tiger[tiger_data.cur_frame].ModelMatrix[0];	// ModelMatrix[0]만 scale(0.2,0.2,0.2)가 됐으므로 여기는 ModelMatrix[cam_index]가 아니라 ModelMatrix[0]을 써줘야함.
+	ModelViewMatrix[cam_index] = glm::translate(ModelViewMatrix[cam_index], glm::vec3(100.0f, 0.0f, 0.0f));
+	ModelViewMatrix[cam_index] *= tiger[tiger_data.cur_frame].ModelMatrix[0];	// ModelMatrix[0]만 scale(0.2,0.2,0.2)가 됐으므로 여기는 ModelMatrix[cam_index]가 아니라 ModelMatrix[0]을 써줘야함.
 
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
