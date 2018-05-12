@@ -680,10 +680,10 @@ void initialize_camera(void) {
 	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup); //u,v,n벡터를 lookAt으로 세팅
 
 //	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
-	camera[0].fov_y = 50.0f;
+	camera[0].fov_y = 30.0f;
 	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
 	camera[0].near_clip = 1.0f;
-	camera[0].far_clip = 1000.0f;
+	camera[0].far_clip = 150.0f;
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
 //initialize the 1st camera. used for front_view
@@ -746,8 +746,8 @@ void initialize_camera(void) {
 
 	//camera[3].fov_y = 15.0f;
 	//camera[3].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
-	camera[3].near_clip = 1130.0f;    // 1200 - (50 + 20)
-	camera[3].far_clip = 1220.0f;     // 1200 + 20
+	camera[3].near_clip = 930.0f;    // 1200 - (50 + 220)  - 천정에서 220 더
+	camera[3].far_clip = 1220.0f;     // 1200 + (0 + 20)   - 바닥에서 20 더
 
 // VIEW_CCTV
 // static cctv 1
