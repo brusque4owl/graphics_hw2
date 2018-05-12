@@ -73,7 +73,6 @@ void display_camera(int cam_index){ // display()함수로 인해 매초마다 불러짐.
 		glLineWidth(2.0f);
 		draw_axes(cam_index);
 		draw_main_camera_axes(cam_index);
-		//draw_frustum(cam_index);
 		draw_frustum_line(cam_index);
 		glLineWidth(1.0f);
 
@@ -682,7 +681,7 @@ void initialize_camera(void) {
 //	ProjectionMatrix = glm::perspective(15.0f*TO_RADIAN, aspect_ratio, 1.0f, 10000.0f);
 	camera[0].fov_y = 30.0f;
 	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
-	camera[0].near_clip = 1.0f;
+	camera[0].near_clip = 10.0f;
 	camera[0].far_clip = 150.0f;
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
@@ -713,18 +712,7 @@ void initialize_camera(void) {
 	camera[2].right = 270.0f; // 230 + 40
 	camera[2].bottom =-20.0f; // 0 - 20
 	camera[2].top = 70.0f;	  // 50 + 20
-	
-	/*
-	camera[2].prp = glm::vec3(0.0f, -100.0f, 0.0f);	// 카메라 위치
-	camera[2].vrp = glm::vec3(0.0f, 230.0f, 0.0f);		// 바라보는 곳
-	camera[2].vup = glm::vec3(0.0f, 0.0f, 1.0f);
-	ViewMatrix[2] = glm::lookAt(camera[2].prp, camera[2].vrp, camera[2].vup);
 
-	camera[2].left = -40.0f;  // prp를 (0,0,0)으로 놓고 계산한 값
-	camera[2].right = 270.0f; // 230 + 40
-	camera[2].bottom = -20.0f; // 0 - 20
-	camera[2].top = 70.0f;	  // 50 + 20
-	*/
 	//camera[2].fov_y = 15.0f;
 	//camera[2].aspect_ratio = 1.0f; // will be set when the viewing window popped up.
 	camera[2].near_clip = 10.0f;
@@ -831,7 +819,6 @@ void initialize_OpenGL(void) {
 
 void prepare_scene(void) {
 	define_axes();
-	define_frustum();
 	define_frustum_line();
 	define_static_objects();
 	define_animated_tiger();

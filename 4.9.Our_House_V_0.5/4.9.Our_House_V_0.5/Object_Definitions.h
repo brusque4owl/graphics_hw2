@@ -433,77 +433,8 @@ void draw_axes(int cam_index) {
 	glBindVertexArray(0);
 }
 
-// /*  // START OF FRUSTUM
-
-GLuint VBO_frustum, VAO_frustum;
-GLfloat vertices_frustum[8][3] = {
-	{ -1.0f, -1.0f, -1.0f},{ 1.0f, -1.0f, -1.0f},{ 1.0f, 1.0f, -1.0f},{ -1.0f, 1.0f, -1.0f},
-	{ -1.0f, -1.0f, 1.0f},{ 1.0f, -1.0f, 1.0f},{ 1.0f, 1.0f, 1.0f},{ -1.0f, 1.0f, 1.0f}
-};
-GLfloat frustum_color[2][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f } }; // yellow, magenta
-
-void define_frustum(void) {
-	glGenBuffers(1, &VBO_frustum);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_frustum), &vertices_frustum[0][0], GL_STATIC_DRAW);
-
-	// Initialize vertex array object.
-	glGenVertexArrays(1, &VAO_frustum);
-	glBindVertexArray(VAO_frustum);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-#define WC_FRUSTUM_LENGTH		5.0f
-void draw_frustum(int cam_index) {
-
-	/*
-	glm::mat4 InverseMatrix_PV = glm::inverse(ProjectionMatrix[cam_index] * ViewMatrix[cam_index]);
-	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
-	ModelViewProjectionMatrix = InverseMatrix_PV * ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
-	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ViewMatrix[cam_index] * ModelViewProjectionMatrix;
-	*/
-	
-	glm::mat4 InverseMatrix_PV = glm::inverse(ProjectionMatrix[cam_index] * ViewMatrix[cam_index]);
-	//ModelViewMatrix[cam_index] = glm::rotate(ViewMatrix[cam_index], 90.0f * TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
-	//ModelViewMatrix[cam_index] = glm::translate(ModelViewMatrix[cam_index], camera[camera_selected].prp);
-
-	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
-	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
-	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);
-	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_n, rotate_axis_n);
-	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
-
-	ModelViewProjectionMatrix = InverseMatrix_PV * ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
-	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ViewMatrix[cam_index] * ModelViewProjectionMatrix;
-	/*
-	ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH, WC_FRUSTUM_LENGTH));
-	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
-	*/
-	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-
-	glBindVertexArray(VAO_frustum);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 0, 2);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 2, 2);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 4, 2);
-	glUniform3fv(loc_primitive_color, 1, frustum_color[0]);
-	glDrawArrays(GL_LINES, 6, 2);
-	glBindVertexArray(0);
-}
-// */	// END OF FRUSTUM
-
 
 // /*   // START OF FRUSTUM LINE
-
 GLuint VBO_frustum_line, VAO_frustum_line;
 /*
 GLfloat Hfar = 2.0f * (tan(camera[0].fov_y/2.0f) * camera[0].far_clip);
@@ -518,26 +449,36 @@ GLfloat frustum_line_color[4][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f },{
 void define_frustum_line(void) {
 	printf("camera[0].far_clip = %f\t camera[0].fov_y = %f\t camera[0].aspect_ratio = %f\n\n", camera[0].far_clip, camera[0].fov_y, camera[0].aspect_ratio);
 
+	GLfloat Hnear = 2.0f * (tan(camera[0].fov_y *TO_RADIAN / 2.0f) * camera[0].near_clip);
+	GLfloat Wnear = Hnear * camera[0].aspect_ratio;
 	GLfloat Hfar = 2.0f * (tan(camera[0].fov_y *TO_RADIAN / 2.0f) * camera[0].far_clip);
 	GLfloat Wfar = Hfar * camera[0].aspect_ratio;
+
+	glm::vec3 ntl_1 = camera[0].near_clip * -camera[0].naxis + (camera[0].vaxis * (Hnear / 2.0f)) + (-camera[0].uaxis * (Wnear / 2.0f));
+	glm::vec3 ntl_2 = camera[0].near_clip * -camera[0].naxis + (camera[0].vaxis * (Hnear / 2.0f)) + (camera[0].uaxis * (Wnear / 2.0f));
+	glm::vec3 ntl_3 = camera[0].near_clip * -camera[0].naxis + (-camera[0].vaxis * (Hnear / 2.0f)) + (-camera[0].uaxis * (Wnear / 2.0f));
+	glm::vec3 ntl_4 = camera[0].near_clip * -camera[0].naxis + (-camera[0].vaxis * (Hnear / 2.0f)) + (camera[0].uaxis * (Wnear / 2.0f));
+
 	glm::vec3 ftl_1 = camera[0].far_clip * -camera[0].naxis + (camera[0].vaxis * (Hfar / 2.0f)) + (-camera[0].uaxis * (Wfar / 2.0f));     // up-left    - yellow
 	glm::vec3 ftl_2 = camera[0].far_clip * -camera[0].naxis + (camera[0].vaxis * (Hfar / 2.0f)) + (camera[0].uaxis * (Wfar / 2.0f));      // up-right   - magenta
 	glm::vec3 ftl_3 = camera[0].far_clip * -camera[0].naxis + (-camera[0].vaxis * (Hfar / 2.0f)) + (-camera[0].uaxis * (Wfar / 2.0f));	  // down-left  - white
 	glm::vec3 ftl_4 = camera[0].far_clip * -camera[0].naxis + (-camera[0].vaxis * (Hfar / 2.0f)) + (camera[0].uaxis * (Wfar / 2.0f));     // down-right - cyan
-	GLfloat vertices_frustum_line[12][3] = {
+	GLfloat vertices_frustum_line[16][3] = {
 		{ 0.0f, 0.0f, 0.0f },{ ftl_1.x,ftl_1.y,ftl_1.z },
 		{ 0.0f, 0.0f, 0.0f },{ ftl_2.x,ftl_2.y,ftl_2.z },
 		{ 0.0f, 0.0f, 0.0f },{ ftl_3.x,ftl_3.y,ftl_3.z },
 		{ 0.0f, 0.0f, 0.0f },{ ftl_4.x,ftl_4.y,ftl_4.z },
 		//far plane
-		{ ftl_1.x,ftl_1.y,ftl_1.z },{ ftl_3.x,ftl_3.y,ftl_3.z },{ ftl_4.x,ftl_4.y,ftl_4.z }, { ftl_2.x,ftl_2.y,ftl_2.z }
-		
+		{ ftl_1.x,ftl_1.y,ftl_1.z },{ ftl_3.x,ftl_3.y,ftl_3.z },{ ftl_4.x,ftl_4.y,ftl_4.z }, { ftl_2.x,ftl_2.y,ftl_2.z },
+		//near plane
+		{ ntl_1.x,ntl_1.y,ntl_1.z },{ ntl_3.x,ntl_3.y,ntl_3.z },{ ntl_4.x,ntl_4.y,ntl_4.z },{ ntl_2.x,ntl_2.y,ntl_2.z }
 	};
-
+	/*
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_1.x, ftl_1.y, ftl_1.z, frustum_line_color[0][0], frustum_line_color[0][1], frustum_line_color[0][2]);
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_2.x, ftl_2.y, ftl_2.z, frustum_line_color[1][0], frustum_line_color[1][1], frustum_line_color[1][2]);
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_3.x, ftl_3.y, ftl_3.z, frustum_line_color[2][0], frustum_line_color[2][1], frustum_line_color[2][2]);
 	printf("tfl.x = %f\ttfl.y = %f\ttfl.z = %f\tcolor = (%f,%f,%f)\n\n", ftl_4.x, ftl_4.y, ftl_4.z, frustum_line_color[3][0], frustum_line_color[3][1], frustum_line_color[3][2]);
+	*/
 	glGenBuffers(1, &VBO_frustum_line);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO_frustum_line);
@@ -582,6 +523,9 @@ void draw_frustum_line(int cam_index) {
 	// far plane
 	glUniform3fv(loc_primitive_color, 1, frustum_line_color[1]);
 	glDrawArrays(GL_LINE_LOOP, 8, 4);
+	// near plane
+	glUniform3fv(loc_primitive_color, 1, frustum_line_color[1]);
+	glDrawArrays(GL_LINE_LOOP, 12, 4);
 
 	glBindVertexArray(0);
 }
