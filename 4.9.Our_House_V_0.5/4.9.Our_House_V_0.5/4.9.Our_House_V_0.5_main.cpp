@@ -640,7 +640,7 @@ void register_callbacks(void) {
 	cc.left_button_status = GLUT_UP;
 
 	glutMouseFunc(mousepress);
-	glutMotionFunc(motion_1);
+	//glutMotionFunc(motion_1);
 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
