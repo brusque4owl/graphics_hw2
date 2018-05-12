@@ -436,14 +436,6 @@ void draw_axes(int cam_index) {
 
 // /*   // START OF FRUSTUM LINE
 GLuint VBO_frustum_line, VAO_frustum_line;
-/*
-GLfloat Hfar = 2.0f * (tan(camera[0].fov_y/2.0f) * camera[0].far_clip);
-GLfloat Wfar = Hfar * camera[0].aspect_ratio;
-glm::vec3 ftl = camera[0].far_clip * glm::vec3(0.0f,0.0f,-1.0f) + (glm::vec3(0.0f, 1.0f, 0.0f) * (Hfar / 2.0f)) - (glm::vec3(1.0f, 0.0f, 0.0f) * (Wfar / 2.0f));
-GLfloat vertices_frustum_line[2][3] = {
-{ 0.0f, 0.0f, 0.0f },{ftl.x,ftl.y,ftl.z}
-};
-*/
 GLfloat frustum_line_color[4][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f, 1.0f } }; // yellow, magenta
 
 void define_frustum_line(void) {
@@ -506,7 +498,6 @@ void draw_frustum_line(int cam_index) {
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_n, rotate_axis_n);
 	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH));
 
-	//ModelViewMatrix[cam_index] = glm::scale(ViewMatrix[cam_index], glm::vec3(WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH, WC_FRUSTUM_LINE_LENGTH));
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 
@@ -532,14 +523,14 @@ void draw_frustum_line(int cam_index) {
 // */    END OF FRUSTUM LINE
 
 void draw_main_camera_axes(int cam_index) {
+	if(cam_index==0) return;
 	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_n, rotate_axis_n);
-	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(15.0f, -15.0f, 15.0f));
+	ModelViewMatrix[cam_index] = glm::scale(ModelViewMatrix[cam_index], glm::vec3(-15.0f, 15.0f, 15.0f));
 	ModelViewProjectionMatrix = ProjectionMatrix[cam_index] * ModelViewMatrix[cam_index];
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
-
 
 	glBindVertexArray(VAO_axes);
 	glUniform3fv(loc_primitive_color, 1, axes_color[0]);

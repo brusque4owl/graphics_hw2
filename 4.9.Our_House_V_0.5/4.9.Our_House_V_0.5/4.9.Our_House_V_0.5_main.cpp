@@ -669,6 +669,7 @@ void initialize_camera(void) {
 	camera[0].vrp = glm::vec3(197.0f, 86.0f, 13.0f);		// 바라보는 곳
 	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 	*/
+
 	camera[0].prp = glm::vec3(212.778366f, 163.684006f, 11.367419f);		// 카메라 위치
 	camera[0].vrp = glm::vec3(212.100739f, 115.430161f, 12.360538f);		// 바라보는 곳
 	camera[0].vup = glm::vec3(0.0f, 0.0f, 1.0f);
