@@ -15,9 +15,9 @@ GLint loc_ModelViewProjectionMatrix, loc_primitive_color; // indices of uniform 
 #define TO_RADIAN 0.01745329252f  
 #define TO_DEGREE 57.295779513f
 
-														  //////////////////////////////////////////////////////////////////
-														  //////// Setting Cameras /////////////////////////////////////////
-														  //////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+//////// Setting Cameras /////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 #define NUMBER_OF_CAMERAS 8		// main, static cctv * 3, dynamic cctv, front view, side view, top view
 #define CAM_TRANSLATION_SPEED 0.025f
 #define CAM_ROTATION_SPEED 0.1f
@@ -50,11 +50,9 @@ typedef struct _VIEWPORT {
 } VIEWPORT;
 VIEWPORT viewport[NUMBER_OF_CAMERAS];					// 뷰 포트 세팅
 
-														//카메라 기준점 pos(vec3타입)을 옮김. 카메라를 axis를 축을 기준으로 del에 비례하여 이동시켜라.
-
-														//////////////////////////////////////////////////////////////////
-														/////// End of Setting Cameras ///////////////////////////////////
-														//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+/////// End of Setting Cameras ///////////////////////////////////
+//////////////////////////////////////////////////////////////////
 
 typedef struct _CALLBACK_CONTEXT {
 	int left_button_status;
@@ -322,7 +320,18 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
+	case 't':	// used for debugging tiger path
+		camera[0].prp = glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z+500.0f);		// 카메라 위치
+		camera[0].vrp = glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z);		// 바라보는 곳
+		//u,v,n벡터를 lookAt으로 세팅
+		ViewMatrix[camera_selected] = glm::lookAt(camera[camera_selected].prp, camera[camera_selected].vrp, camera[camera_selected].vup);
+		camera[camera_selected].zoom_factor = 1.0f;
+		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
+		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		glutPostRedisplay();
+		break;
 	}
+
 }
 
 void reshape(int width, int height) {
@@ -699,10 +708,10 @@ void initialize_camera(void) {
 	camera[0].fov_y = 30.0f;
 	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
 	camera[0].near_clip = 10.0f;
-	camera[0].far_clip = 150.0f;
+	camera[0].far_clip = 1500.0f; // 150.0f;  // for debug
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
-								  //initialize the 1st camera. used for front_view
+	//initialize the 1st camera. used for front_view
 	camera[1].prp = glm::vec3(300.0f, 0.0f, 0.0f);	// 카메라 위치
 	camera[1].vrp = glm::vec3(0.0f, 0.0f, 0.0f);		// 바라보는 곳
 	camera[1].vup = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -814,24 +823,6 @@ void initialize_OpenGL(void) {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClearColor(0.12f, 0.18f, 0.12f, 1.0f);
-	/*
-	//기존에 주어진 카메라 세팅부분
-	// top view
-	if (0) {
-	ViewMatrix[0] = glm::lookAt(glm::vec3(120.0f, 90.0f, 1000.0f), glm::vec3(120.0f, 90.0f, 0.0f),
-	glm::vec3(-10.0f, 0.0f, 0.0f));
-	}
-	// front view
-	if (0) {
-	ViewMatrix[0] = glm::lookAt(glm::vec3(800.0f, 90.0f, 25.0f), glm::vec3(0.0f, 90.0f, 25.0f),
-	glm::vec3(0.0f, 0.0f, 1.0f));
-	}
-	// Used in initialize_camera()
-	if (0) {
-	ViewMatrix[0] = glm::lookAt(glm::vec3(600.0f, 600.0f, 200.0f), glm::vec3(125.0f, 80.0f, 25.0f),
-	glm::vec3(0.0f, 0.0f, 1.0f));
-	}
-	*/
 }
 
 void prepare_scene(void) {
