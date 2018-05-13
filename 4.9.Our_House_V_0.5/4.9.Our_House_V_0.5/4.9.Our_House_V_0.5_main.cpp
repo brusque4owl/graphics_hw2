@@ -320,6 +320,7 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
+		/*
 	case 't':	// used for debugging tiger path
 		camera[0].prp = glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z+500.0f);		// 카메라 위치
 		camera[0].vrp = glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z);		// 바라보는 곳
@@ -330,6 +331,7 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		glutPostRedisplay();
 		break;
+		*/
 	}
 
 }
@@ -708,7 +710,7 @@ void initialize_camera(void) {
 	camera[0].fov_y = 30.0f;
 	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
 	camera[0].near_clip = 10.0f;
-	camera[0].far_clip = 1500.0f; // 150.0f;  // for debug
+	camera[0].far_clip = 150.0f; // 1500.0f;  // for debug
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
 	//initialize the 1st camera. used for front_view
