@@ -165,6 +165,7 @@ void motion_rotate_uaxis(int x, int y);
 void motion_rotate_vaxis(int x, int y);
 void motion_rotate_naxis(int x, int y);
 void motion_1(int x, int y);
+void motion_car(int x, int y);
 
 #define CAR_MOV 1.0f
 void arrow_key(int key, int x, int y){
@@ -224,15 +225,12 @@ void arrow_key(int key, int x, int y){
 	case GLUT_KEY_LEFT:		// turn left
 		car_pos.rot += 1.0f;
 		if(car_pos.rot >= 360.0f) car_pos.rot = car_pos.rot - 360.0f;
-		printf("car_pos.rot = %f\n", car_pos.rot);
 		break;
 	case GLUT_KEY_RIGHT:	// turn right
 		car_pos.rot -= 1.0f;
 		if (car_pos.rot < 0.0f) car_pos.rot = 360.0f + car_pos.rot;  // 360 + (-1)
-		printf("car_pos.rot = %f\n", car_pos.rot);
 		break;
 	}
-	printf("distance = %f\n", car_pos.dist);
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -344,11 +342,15 @@ void keyboard(unsigned char key, int x, int y) {
 		view_mode = 1 - view_mode;
 		glutPostRedisplay();
 		break;
-	case 'm':
+	case ']':
 		glutMotionFunc(motion_1);
 		glutPostRedisplay();
 		break;
 
+	case 'm':					// change mode to moving_car
+		glutMotionFunc(motion_car);
+		glutPostRedisplay();
+		break;
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -720,6 +722,50 @@ void motion_rotate_naxis(int x, int y) {
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+		glutPostRedisplay();
+	}
+}
+
+void motion_car(int x, int y){
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
+	float car_delta_x, car_delta_y;
+	car_delta_x = abs(cos(car_pos.rot*TO_RADIAN));
+	car_delta_y = abs(sin(car_pos.rot*TO_RADIAN));
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		// Movement forward, backward
+		// the 1st quadrant(270~360 degree)
+		if (car_pos.rot >= 270.0f && car_pos.rot<360.0f) {
+			car_pos.x -= dely * car_delta_x * CAM_ROT_SENSITIVITY;
+			car_pos.y += dely * car_delta_y * CAM_ROT_SENSITIVITY;
+		}
+		// the 2nd quadrant(0~89)
+		else if (car_pos.rot >= 0.0f && car_pos.rot<90.0f) {
+			car_pos.x -= dely * car_delta_x * CAM_ROT_SENSITIVITY;
+			car_pos.y -= dely * car_delta_y * CAM_ROT_SENSITIVITY;
+		}
+		// the 3rd quadrant(90~179)
+		else if (car_pos.rot >= 90.0f && car_pos.rot<180.0f) {
+			car_pos.x += dely * car_delta_x * CAM_ROT_SENSITIVITY;
+			car_pos.y -= dely * car_delta_y * CAM_ROT_SENSITIVITY;
+		}
+		// the 4th quadrant(180~269)
+		else {
+			car_pos.x += dely * car_delta_x * CAM_ROT_SENSITIVITY;
+			car_pos.y += dely * car_delta_y * CAM_ROT_SENSITIVITY;
+		}
+		car_pos.dist += dely * CAM_ROT_SENSITIVITY;
+		if(dely!=0.0f)	car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;	// 바퀴 회전각 = 이동거리*180/(PI*radius)
+
+		// turn left, right
+		car_pos.rot -= delx * CAM_ROT_SENSITIVITY;
+		if (car_pos.rot >= 360.0f) car_pos.rot = car_pos.rot - 360.0f;
+		if (car_pos.rot < 0.0f) car_pos.rot = 360.0f + car_pos.rot;
+
 		glutPostRedisplay();
 	}
 }
