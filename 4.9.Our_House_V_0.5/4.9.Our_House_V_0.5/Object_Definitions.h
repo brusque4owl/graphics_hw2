@@ -439,7 +439,16 @@ void draw_axes(int cam_index) {
 	glDrawArrays(GL_LINES, 4, 2);
 	glBindVertexArray(0);
 }
-
+void draw_axes_car(int cam_index) {
+	glBindVertexArray(VAO_axes);
+	glUniform3fv(loc_primitive_color, 1, axes_color[0]);
+	glDrawArrays(GL_LINES, 0, 2);
+	glUniform3fv(loc_primitive_color, 1, axes_color[1]);
+	glDrawArrays(GL_LINES, 2, 2);
+	glUniform3fv(loc_primitive_color, 1, axes_color[2]);
+	glDrawArrays(GL_LINES, 4, 2);
+	glBindVertexArray(0);
+}
 
 // /*   // START OF FRUSTUM LINE
 GLuint VBO_frustum_line, VAO_frustum_line;
@@ -1031,12 +1040,15 @@ void free_geom_obj(int geom_obj_ID) {
 
 typedef struct __car_position{
 	float x,y,z;
-	float rot;
+	float rot;	// 차체 회전각
+	float dist;	// 이동거리
+	float wheel_rot; // 바퀴 전후 회전각
 }CAR_POS;
-CAR_POS car_pos = {50.0f, 140.0f, 4.5f, 90.0f};
+CAR_POS car_pos = {50.0f, 140.0f, 4.5f, 90.0f, 0.0f};
 // DRAW CAR OBJECTS
 #define rad 1.7f
 #define ww 1.0f
+#define pi_rad PI*rad
 void draw_wheel_and_nut(int cam_index) {
 	// angle is used in Hierarchical_Car_Correct later
 	int i;
@@ -1069,8 +1081,9 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	glUniform3f(loc_primitive_color, 0.498f, 1.000f, 0.831f); // color name: Aquamarine
 	draw_geom_obj(GEOM_OBJ_ID_CAR_BODY); // draw body
 
+	
 	glLineWidth(2.0f);
-	draw_axes(cam_index); // draw MC axes of body
+	draw_axes_car(cam_index); // draw MC axes of body
 	glLineWidth(1.0f);
 
 	ModelMatrix_CAR_DRIVER = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.0f, 0.5f, 2.5f));
@@ -1078,27 +1091,32 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_DRIVER;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	glLineWidth(5.0f);
-	draw_axes(cam_index); // draw camera frame at driver seat
+	draw_axes_car(cam_index); // draw camera frame at driver seat
 	glLineWidth(1.0f);
+	
 
 	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.9f, -3.5f, 4.5f));
+	ModelMatrix_CAR_WHEEL = glm::rotate(ModelMatrix_CAR_WHEEL, car_pos.wheel_rot*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));	// 바퀴 회전
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_wheel_and_nut(cam_index);  // draw wheel 0
 
 	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(3.9f, -3.5f, 4.5f));
+	ModelMatrix_CAR_WHEEL = glm::rotate(ModelMatrix_CAR_WHEEL, car_pos.wheel_rot*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_wheel_and_nut(cam_index);  // draw wheel 1
 
 	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.9f, -3.5f, -4.5f));
 	ModelMatrix_CAR_WHEEL = glm::scale(ModelMatrix_CAR_WHEEL, glm::vec3(1.0f, 1.0f, -1.0f));
+	ModelMatrix_CAR_WHEEL = glm::rotate(ModelMatrix_CAR_WHEEL, car_pos.wheel_rot*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_wheel_and_nut(cam_index);  // draw wheel 2
 
 	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(3.9f, -3.5f, -4.5f));
 	ModelMatrix_CAR_WHEEL = glm::scale(ModelMatrix_CAR_WHEEL, glm::vec3(1.0f, 1.0f, -1.0f));
+	ModelMatrix_CAR_WHEEL = glm::rotate(ModelMatrix_CAR_WHEEL, car_pos.wheel_rot*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_wheel_and_nut(cam_index);  // draw wheel 3

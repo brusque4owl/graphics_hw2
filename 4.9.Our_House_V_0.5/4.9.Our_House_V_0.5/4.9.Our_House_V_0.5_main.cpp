@@ -14,7 +14,7 @@ GLint loc_ModelViewProjectionMatrix, loc_primitive_color; // indices of uniform 
 
 #define TO_RADIAN 0.01745329252f  
 #define TO_DEGREE 57.295779513f
-
+#define PI      3.141592653f 
 //////////////////////////////////////////////////////////////////
 //////// Setting Cameras /////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
@@ -194,8 +194,8 @@ void arrow_key(int key, int x, int y){
 			car_pos.x += delta_x * CAR_MOV;
 			car_pos.y += delta_y * CAR_MOV;
 		}
-		printf("delta_car_pos.x = %f\n", abs(cos(car_pos.rot*TO_RADIAN)));
-		printf("delta_car_pos.y = %f\n", abs(sin(car_pos.rot*TO_RADIAN)));
+		car_pos.dist += CAR_MOV;
+		car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;	// 바퀴 회전각 = 이동거리*180/(PI*radius)
 		break;
 	case GLUT_KEY_DOWN:		// backward
 		// the 1st quadrant(270~360 degree)
@@ -218,8 +218,8 @@ void arrow_key(int key, int x, int y){
 			car_pos.x -= delta_x * CAR_MOV;
 			car_pos.y -= delta_y * CAR_MOV;
 		}
-		printf("delta_car_pos.x = %f\n", abs(cos(car_pos.rot)));
-		printf("delta_car_pos.y = %f\n", abs(sin(car_pos.rot)));
+		car_pos.dist -= CAR_MOV;
+		car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;
 		break;
 	case GLUT_KEY_LEFT:		// turn left
 		car_pos.rot += 1.0f;
@@ -232,6 +232,7 @@ void arrow_key(int key, int x, int y){
 		printf("car_pos.rot = %f\n", car_pos.rot);
 		break;
 	}
+	printf("distance = %f\n", car_pos.dist);
 }
 
 void keyboard(unsigned char key, int x, int y) {
