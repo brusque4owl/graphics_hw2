@@ -68,74 +68,40 @@ int view_mode;
 void display_camera(int cam_index) { // display()함수로 인해 매초마다 불러짐.
 
 	glViewport(viewport[cam_index].x, viewport[cam_index].y, viewport[cam_index].w, viewport[cam_index].h);
-	
-
-	switch (view_mode) {
-	case VIEW_CAMERA:
-		glLineWidth(2.0f);
-		draw_axes(cam_index);
+	glLineWidth(2.0f);
+	draw_axes(cam_index);
+	if (view_mode == VIEW_CAMERA) {
 		draw_main_camera_axes(cam_index);
 		draw_frustum_line(cam_index);
-		draw_car_dummy(cam_index);
+	}
+	draw_car_dummy(cam_index);
+	draw_path(cam_index);
 
-		glLineWidth(1.0f);
+	glLineWidth(1.0f);
 
-		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
 
-		draw_static_object(&(static_objects[OBJ_TABLE]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_TABLE]), 1, cam_index);	// takes given teapot
+	draw_static_object(&(static_objects[OBJ_TABLE]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_TABLE]), 1, cam_index);	// takes given teapot
 
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 1, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 2, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 3, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 4, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 5, cam_index);			// NEW OBJ_LIGHT
+	draw_static_object(&(static_objects[OBJ_LIGHT]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_LIGHT]), 1, cam_index);
+	draw_static_object(&(static_objects[OBJ_LIGHT]), 2, cam_index);
+	draw_static_object(&(static_objects[OBJ_LIGHT]), 3, cam_index);
+	draw_static_object(&(static_objects[OBJ_LIGHT]), 4, cam_index);
+	draw_static_object(&(static_objects[OBJ_LIGHT]), 5, cam_index);			// NEW OBJ_LIGHT
 
-		draw_static_object(&(static_objects[OBJ_TEAPOT]), 0, cam_index);	// on the OBJ_TABLE 1
-		draw_static_object(&(static_objects[OBJ_TEAPOT]), 1, cam_index);			// NEW OBJ_TEAPOT
-		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 1, cam_index);		// NEW OBJ_NEW_CHAIR
-		draw_static_object(&(static_objects[OBJ_FRAME]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_FRAME]), 1, cam_index);			// NEW OBJ_FRAME
-		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 1, cam_index);		// NEW OBJ_NEW_PICTURE
-		draw_static_object(&(static_objects[OBJ_COW]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_TEAPOT]), 0, cam_index);	// on the OBJ_TABLE 1
+	draw_static_object(&(static_objects[OBJ_TEAPOT]), 1, cam_index);			// NEW OBJ_TEAPOT
+	draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 1, cam_index);		// NEW OBJ_NEW_CHAIR
+	draw_static_object(&(static_objects[OBJ_FRAME]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_FRAME]), 1, cam_index);			// NEW OBJ_FRAME
+	draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 0, cam_index);
+	draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 1, cam_index);		// NEW OBJ_NEW_PICTURE
+	draw_static_object(&(static_objects[OBJ_COW]), 0, cam_index);
 
-		draw_animated_tiger(cam_index);
-		break;
-	case VIEW_CCTV:
-		glLineWidth(2.0f);
-		draw_axes(cam_index);
-		draw_car_dummy(cam_index);
-
-		glLineWidth(1.0f);
-
-		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
-
-		draw_static_object(&(static_objects[OBJ_TABLE]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_TABLE]), 1, cam_index);	// takes given teapot
-
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 1, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 2, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 3, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 4, cam_index);
-		draw_static_object(&(static_objects[OBJ_LIGHT]), 5, cam_index);			// NEW OBJ_LIGHT
-
-		draw_static_object(&(static_objects[OBJ_TEAPOT]), 0, cam_index);	// on the OBJ_TABLE 1
-		draw_static_object(&(static_objects[OBJ_TEAPOT]), 1, cam_index);			// NEW OBJ_TEAPOT
-		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_NEW_CHAIR]), 1, cam_index);		// NEW OBJ_NEW_CHAIR
-		draw_static_object(&(static_objects[OBJ_FRAME]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_FRAME]), 1, cam_index);			// NEW OBJ_FRAME
-		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 0, cam_index);
-		draw_static_object(&(static_objects[OBJ_NEW_PICTURE]), 1, cam_index);		// NEW OBJ_NEW_PICTURE
-		draw_static_object(&(static_objects[OBJ_COW]), 0, cam_index);
-
-		draw_animated_tiger(cam_index);
-		break;
-	} // END OF SWITCH(VIEW_MODE)
+	draw_animated_tiger(cam_index);
 }
 void display(void) {   // 매초마다 불러짐
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -342,15 +308,12 @@ void keyboard(unsigned char key, int x, int y) {
 		view_mode = 1 - view_mode;
 		glutPostRedisplay();
 		break;
-	case ']':
-		glutMotionFunc(motion_1);
-		glutPostRedisplay();
-		break;
 
 	case 'm':					// change mode to moving_car
 		glutMotionFunc(motion_car);
 		glutPostRedisplay();
 		break;
+
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -386,6 +349,7 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
+
 	case 'd':
 		depth_test_on = 1 - depth_test_on;
 		if (depth_test_on) {
@@ -407,6 +371,12 @@ void keyboard(unsigned char key, int x, int y) {
 		camera[camera_selected].zoom_factor = 1.0f;
 		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		glutPostRedisplay();
+		break;
+		*/
+		/*
+	case ']':
+		glutMotionFunc(motion_1);
 		glutPostRedisplay();
 		break;
 		*/
@@ -834,7 +804,7 @@ void initialize_camera(void) {
 	camera[0].fov_y = 30.0f;
 	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
 	camera[0].near_clip = 10.0f;
-	camera[0].far_clip = 1500.0f; // 150.0f;  // for debug
+	camera[0].far_clip = 150.0f; // 1500.0f;  // for debug
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
 	//initialize the 1st camera. used for front_view
@@ -962,6 +932,7 @@ void prepare_scene(void) {
 	prepare_geom_obj(GEOM_OBJ_ID_CAR_BODY, car_body, GEOM_OBJ_TYPE_V);
 	prepare_geom_obj(GEOM_OBJ_ID_CAR_WHEEL, car_wheel, GEOM_OBJ_TYPE_V);
 	prepare_geom_obj(GEOM_OBJ_ID_CAR_NUT, car_nut, GEOM_OBJ_TYPE_V);
+	prepare_path();
 }
 
 void initialize_renderer(void) {

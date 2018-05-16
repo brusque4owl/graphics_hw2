@@ -940,7 +940,6 @@ void draw_animated_tiger(int cam_index) {
 	glBindVertexArray(tiger[tiger_data.cur_frame].VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3 * tiger[tiger_data.cur_frame].n_triangles);
 	glBindVertexArray(0);
-	//if(cam_index==0) // Only for main_camera
 	ModelViewProjectionMatrix = glm::scale(ModelViewProjectionMatrix, glm::vec3(20.0f, 20.0f, 20.0f));
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 }
@@ -1121,10 +1120,75 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 	draw_wheel_and_nut(cam_index);  // draw wheel 3
 }
-
-
 // END OF DRAW CAR OBJECTS
 
+// START OF DRAW PATH
+GLuint path_VBO, path_VAO;
+GLfloat *path_vertices;
+int path_n_vertices;
+
+int read_path_file(GLfloat **object, char *filename) {
+	int i, n_vertices;
+	float *flt_ptr;
+	FILE *fp;
+
+	fprintf(stdout, "Reading path from the path file %s...\n", filename);
+	fp = fopen(filename, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Cannot open the path file %s ...", filename);
+		return -1;
+	}
+
+	fscanf(fp, "%d", &n_vertices);
+	*object = (float *)malloc(n_vertices * 3 * sizeof(float));
+	if (*object == NULL) {
+		fprintf(stderr, "Cannot allocate memory for the path file %s ...", filename);
+		return -1;
+	}
+
+	flt_ptr = *object;
+	for (i = 0; i < n_vertices; i++) {
+		fscanf(fp, "%f %f %f", flt_ptr, flt_ptr + 1, flt_ptr + 2);
+		flt_ptr += 3;
+	}
+	fclose(fp);
+
+	fprintf(stdout, "Read %d vertices successfully.\n\n", n_vertices);
+
+	return n_vertices;
+}
+
+void prepare_path(void) { // Draw path.
+						  //	return;
+	path_n_vertices = read_path_file(&path_vertices, (char *)"Data/path.txt");
+	printf("%d %f\n", path_n_vertices, path_vertices[(path_n_vertices - 1)]);
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &path_VAO);
+	glBindVertexArray(path_VAO);
+	glGenBuffers(1, &path_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, path_VBO);
+	glBufferData(GL_ARRAY_BUFFER, path_n_vertices * 3 * sizeof(float), path_vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(LOC_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+void draw_path(int cam_index) {
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index];
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glBindVertexArray(path_VAO);
+	glUniform3f(loc_primitive_color, 1.000f, 0.000f, 1.000f); // color name: Magenta
+	glDrawArrays(GL_LINE_STRIP, 0, path_n_vertices);
+}
+
+void free_path(void) {
+	glDeleteVertexArrays(1, &path_VAO);
+	glDeleteBuffers(1, &path_VBO);
+}
+// END OF DRAW PATH
 void cleanup_OpenGL_stuffs(void) {
 	for (int i = 0; i < n_static_objects; i++) {
 		glDeleteVertexArrays(1, &(static_objects[i].VAO));
@@ -1138,4 +1202,9 @@ void cleanup_OpenGL_stuffs(void) {
 
 	glDeleteVertexArrays(1, &VAO_axes);
 	glDeleteBuffers(1, &VBO_axes);
+
+	free_path();
+	free_geom_obj(GEOM_OBJ_ID_CAR_BODY);
+	free_geom_obj(GEOM_OBJ_ID_CAR_WHEEL);
+	free_geom_obj(GEOM_OBJ_ID_CAR_NUT);
 }
