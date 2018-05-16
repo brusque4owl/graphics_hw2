@@ -166,6 +166,74 @@ void motion_rotate_vaxis(int x, int y);
 void motion_rotate_naxis(int x, int y);
 void motion_1(int x, int y);
 
+#define CAR_MOV 1.0f
+void arrow_key(int key, int x, int y){
+	float delta_x, delta_y;
+	delta_x = abs(cos(car_pos.rot*TO_RADIAN));
+	delta_y = abs(sin(car_pos.rot*TO_RADIAN));
+
+	switch(key) {
+	case GLUT_KEY_UP:		// forward
+		// the 1st quadrant(270~360 degree)
+		if(car_pos.rot>=270.0f && car_pos.rot<360.0f){
+			car_pos.x -= delta_x * CAR_MOV;
+			car_pos.y += delta_y * CAR_MOV;
+		}
+		// the 2nd quadrant(0~89)
+		else if (car_pos.rot >= 0.0f && car_pos.rot<90.0f) {
+			car_pos.x -= delta_x * CAR_MOV;
+			car_pos.y -= delta_y * CAR_MOV;
+		}
+		// the 3rd quadrant(90~179)
+		else if (car_pos.rot >= 90.0f && car_pos.rot<180.0f) {
+			car_pos.x += delta_x * CAR_MOV;
+			car_pos.y -= delta_y * CAR_MOV;
+		}
+		// the 4th quadrant(180~269)
+		else{
+			car_pos.x += delta_x * CAR_MOV;
+			car_pos.y += delta_y * CAR_MOV;
+		}
+		printf("delta_car_pos.x = %f\n", abs(cos(car_pos.rot*TO_RADIAN)));
+		printf("delta_car_pos.y = %f\n", abs(sin(car_pos.rot*TO_RADIAN)));
+		break;
+	case GLUT_KEY_DOWN:		// backward
+		// the 1st quadrant(270~360 degree)
+		if (car_pos.rot >= 270.0f && car_pos.rot<360.0f) {
+			car_pos.x += delta_x * CAR_MOV;
+			car_pos.y -= delta_y * CAR_MOV;
+		}
+		// the 2nd quadrant(0~89)
+		else if (car_pos.rot >= 0.0f && car_pos.rot<90.0f) {
+			car_pos.x += delta_x * CAR_MOV;
+			car_pos.y += delta_y * CAR_MOV;
+		}
+		// the 3rd quadrant(90~179)
+		else if (car_pos.rot >= 90.0f && car_pos.rot<180.0f) {
+			car_pos.x -= delta_x * CAR_MOV;
+			car_pos.y += delta_y * CAR_MOV;
+		}
+		// the 4th quadrant(180~269)
+		else {
+			car_pos.x -= delta_x * CAR_MOV;
+			car_pos.y -= delta_y * CAR_MOV;
+		}
+		printf("delta_car_pos.x = %f\n", abs(cos(car_pos.rot)));
+		printf("delta_car_pos.y = %f\n", abs(sin(car_pos.rot)));
+		break;
+	case GLUT_KEY_LEFT:		// turn left
+		car_pos.rot += 1.0f;
+		if(car_pos.rot >= 360.0f) car_pos.rot = car_pos.rot - 360.0f;
+		printf("car_pos.rot = %f\n", car_pos.rot);
+		break;
+	case GLUT_KEY_RIGHT:	// turn right
+		car_pos.rot -= 1.0f;
+		if (car_pos.rot < 0.0f) car_pos.rot = 360.0f + car_pos.rot;  // 360 + (-1)
+		printf("car_pos.rot = %f\n", car_pos.rot);
+		break;
+	}
+}
+
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
 
@@ -411,6 +479,7 @@ int prevx, prevy;
 // 호랑이 움직임관련 함수
 void timer_scene(int timestamp_scene) {
 	tiger_data.cur_frame = timestamp_scene % N_TIGER_FRAMES;
+	//car_pos.x = car_pos.x + 1;
 	//tiger_data.rotation_angle = (timestamp_scene % 360)*TO_RADIAN;
 	glutPostRedisplay();
 	glutTimerFunc(100, timer_scene, (timestamp_scene + 1) % INT_MAX);
@@ -662,6 +731,7 @@ void register_callbacks(void) {
 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(arrow_key);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(100, timer_scene, 0);
 	glutCloseFunc(cleanup_OpenGL_stuffs);

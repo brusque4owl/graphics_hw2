@@ -1029,7 +1029,11 @@ void free_geom_obj(int geom_obj_ID) {
 }
 // END OF DRAW CAR BODY, WHEEL, NUT
 
-
+typedef struct __car_position{
+	float x,y,z;
+	float rot;
+}CAR_POS;
+CAR_POS car_pos = {50.0f, 140.0f, 4.5f, 90.0f};
 // DRAW CAR OBJECTS
 #define rad 1.7f
 #define ww 1.0f
@@ -1051,11 +1055,11 @@ void draw_wheel_and_nut(int cam_index) {
 	}
 }
 
-void draw_car_dummy(int cam_index) {
+void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	//ModelMatrix_CAR_BODY = glm::rotate(glm::mat4(1.0f), -rotation_angle_car, glm::vec3(0.0f, 1.0f, 0.0f));
-	ModelMatrix_CAR_BODY = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 4.5f));
-	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
-	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
+	ModelMatrix_CAR_BODY = glm::translate(glm::mat4(1.0f), glm::vec3(car_pos.x, car_pos.y, car_pos.z));
+	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, car_pos.rot*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));  // z축 기준으로 좌우회전가능
+	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
 
 	//if (camera_type == CAMERA_DRIVER) set_ViewMatrix_for_driver();
 
