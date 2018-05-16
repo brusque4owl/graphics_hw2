@@ -43,6 +43,8 @@ glm::vec3 rotate_axis_v = glm::vec3(0.0f, 0.0f, 1.0f);
 glm::vec3 rotate_axis_n = glm::vec3(0.0f, 0.0f, 1.0f);
 int camera_selected; // 0 for main_camera, 7 for dynamic_cctv 
 
+glm::mat4 ModelMatrix_CAR_BODY, ModelMatrix_CAR_WHEEL, ModelMatrix_CAR_NUT, ModelMatrix_CAR_DRIVER;
+glm::mat4 ModelMatrix_CAR_BODY_to_DRIVER; // computed only once in initialize_camera()
 #include "Object_Definitions.h"
 
 typedef struct _VIEWPORT {
@@ -66,6 +68,7 @@ int view_mode;
 void display_camera(int cam_index) { // display()함수로 인해 매초마다 불러짐.
 
 	glViewport(viewport[cam_index].x, viewport[cam_index].y, viewport[cam_index].w, viewport[cam_index].h);
+	
 
 	switch (view_mode) {
 	case VIEW_CAMERA:
@@ -73,6 +76,8 @@ void display_camera(int cam_index) { // display()함수로 인해 매초마다 불러짐.
 		draw_axes(cam_index);
 		draw_main_camera_axes(cam_index);
 		draw_frustum_line(cam_index);
+		draw_car_dummy(cam_index);
+
 		glLineWidth(1.0f);
 
 		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
@@ -102,6 +107,8 @@ void display_camera(int cam_index) { // display()함수로 인해 매초마다 불러짐.
 	case VIEW_CCTV:
 		glLineWidth(2.0f);
 		draw_axes(cam_index);
+		draw_car_dummy(cam_index);
+
 		glLineWidth(1.0f);
 
 		draw_static_object(&(static_objects[OBJ_BUILDING]), 0, cam_index);
@@ -404,7 +411,7 @@ int prevx, prevy;
 // 호랑이 움직임관련 함수
 void timer_scene(int timestamp_scene) {
 	tiger_data.cur_frame = timestamp_scene % N_TIGER_FRAMES;
-	tiger_data.rotation_angle = (timestamp_scene % 360)*TO_RADIAN;
+	//tiger_data.rotation_angle = (timestamp_scene % 360)*TO_RADIAN;
 	glutPostRedisplay();
 	glutTimerFunc(100, timer_scene, (timestamp_scene + 1) % INT_MAX);
 }
@@ -710,7 +717,7 @@ void initialize_camera(void) {
 	camera[0].fov_y = 30.0f;
 	camera[0].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
 	camera[0].near_clip = 10.0f;
-	camera[0].far_clip = 150.0f; // 1500.0f;  // for debug
+	camera[0].far_clip = 1500.0f; // 150.0f;  // for debug
 	camera[0].zoom_factor = 1.0f; // will be used for zoomming in and out.
 
 	//initialize the 1st camera. used for front_view
@@ -826,12 +833,18 @@ void initialize_OpenGL(void) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClearColor(0.12f, 0.18f, 0.12f, 1.0f);
 }
+char car_body[] = "Data/car_body_triangles_v.txt";
+char car_wheel[] = "Data/car_wheel_triangles_v.txt";
+char car_nut[] = "Data/car_nut_triangles_v.txt";
 
 void prepare_scene(void) {
 	define_axes();
 	define_frustum_line();
 	define_static_objects();
 	define_animated_tiger();
+	prepare_geom_obj(GEOM_OBJ_ID_CAR_BODY, car_body, GEOM_OBJ_TYPE_V);
+	prepare_geom_obj(GEOM_OBJ_ID_CAR_WHEEL, car_wheel, GEOM_OBJ_TYPE_V);
+	prepare_geom_obj(GEOM_OBJ_ID_CAR_NUT, car_nut, GEOM_OBJ_TYPE_V);
 }
 
 void initialize_renderer(void) {

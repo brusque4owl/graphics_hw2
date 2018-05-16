@@ -4,6 +4,12 @@
 
 #define BUFFER_OFFSET(offset) ((GLvoid *) (offset))
 
+// FOR DRAW CAR
+#define LOC_VERTEX 0
+#define LOC_NORMAL 1
+#define LOC_TEXCOORD 2
+// END OF FOR DRAW CAR
+
 typedef struct _material {
 	glm::vec4 emission, ambient, diffuse, specular;
 	GLfloat exponent;
@@ -27,7 +33,8 @@ typedef struct _Object {
 	Material material[N_MAX_GEOM_COPIES];
 } Object;
 
-#define N_MAX_STATIC_OBJECTS		10
+#define N_MAX_STATIC_OBJECTS		8
+
 Object static_objects[N_MAX_STATIC_OBJECTS]; // allocage memory dynamically every time it is needed rather than using a static array
 int n_static_objects = 0;
 
@@ -928,6 +935,173 @@ void draw_animated_tiger(int cam_index) {
 	ModelViewProjectionMatrix = glm::scale(ModelViewProjectionMatrix, glm::vec3(20.0f, 20.0f, 20.0f));
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 }
+
+
+
+
+// DRAW CAR BODY, WHEEL, NUT
+#define N_GEOMETRY_OBJECTS			3
+
+#define GEOM_OBJ_ID_CAR_BODY 0
+#define GEOM_OBJ_ID_CAR_WHEEL 1
+#define GEOM_OBJ_ID_CAR_NUT 2
+
+GLuint geom_obj_VBO[N_GEOMETRY_OBJECTS];
+GLuint geom_obj_VAO[N_GEOMETRY_OBJECTS];
+
+int geom_obj_n_triangles[N_GEOMETRY_OBJECTS];
+GLfloat *geom_obj_vertices[N_GEOMETRY_OBJECTS];
+
+// codes for the 'general' triangular-mesh object
+typedef enum _GEOM_OBJ_TYPE { GEOM_OBJ_TYPE_V = 0, GEOM_OBJ_TYPE_VN, GEOM_OBJ_TYPE_VNT } GEOM_OBJ_TYPE;
+// GEOM_OBJ_TYPE_V: (x, y, z)
+// GEOM_OBJ_TYPE_VN: (x, y, z, nx, ny, nz)
+// GEOM_OBJ_TYPE_VNT: (x, y, z, nx, ny, nz, s, t)
+int GEOM_OBJ_ELEMENTS_PER_VERTEX[3] = { 3, 6, 8 };
+
+int read_geometry_file(GLfloat **object, char *filename, GEOM_OBJ_TYPE geom_obj_type) {
+	int i, n_triangles;
+	float *flt_ptr;
+	FILE *fp;
+
+	//fprintf(stdout, "Reading geometry from the geometry file %s...\n", filename);
+	fp = fopen(filename, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "Cannot open the geometry file %s ...", filename);
+		return -1;
+	}
+
+	fscanf(fp, "%d", &n_triangles);
+	*object = (float *)malloc(3 * n_triangles*GEOM_OBJ_ELEMENTS_PER_VERTEX[geom_obj_type] * sizeof(float));
+	if (*object == NULL) {
+		fprintf(stderr, "Cannot allocate memory for the geometry file %s ...", filename);
+		return -1;
+	}
+
+	flt_ptr = *object;
+	for (i = 0; i < 3 * n_triangles * GEOM_OBJ_ELEMENTS_PER_VERTEX[geom_obj_type]; i++)
+		fscanf(fp, "%f", flt_ptr++);
+	fclose(fp);
+
+	//fprintf(stdout, "Read %d primitives successfully.\n\n", n_triangles);
+
+	return n_triangles;
+}
+
+void prepare_geom_obj(int geom_obj_ID, char *filename, GEOM_OBJ_TYPE geom_obj_type) {
+	int n_bytes_per_vertex;
+
+	n_bytes_per_vertex = GEOM_OBJ_ELEMENTS_PER_VERTEX[geom_obj_type] * sizeof(float);
+	geom_obj_n_triangles[geom_obj_ID] = read_geometry_file(&geom_obj_vertices[geom_obj_ID], filename, geom_obj_type);
+
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &geom_obj_VAO[geom_obj_ID]);
+	glBindVertexArray(geom_obj_VAO[geom_obj_ID]);
+	glGenBuffers(1, &geom_obj_VBO[geom_obj_ID]);
+	glBindBuffer(GL_ARRAY_BUFFER, geom_obj_VBO[geom_obj_ID]);
+	glBufferData(GL_ARRAY_BUFFER, 3 * geom_obj_n_triangles[geom_obj_ID] * n_bytes_per_vertex,
+		geom_obj_vertices[geom_obj_ID], GL_STATIC_DRAW);
+	glVertexAttribPointer(LOC_VERTEX, 3, GL_FLOAT, GL_FALSE, n_bytes_per_vertex, BUFFER_OFFSET(0));
+	glEnableVertexAttribArray(0);
+	if (geom_obj_type >= GEOM_OBJ_TYPE_VN) {
+		glVertexAttribPointer(LOC_NORMAL, 3, GL_FLOAT, GL_FALSE, n_bytes_per_vertex, BUFFER_OFFSET(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
+	if (geom_obj_type >= GEOM_OBJ_TYPE_VNT) {
+		glVertexAttribPointer(LOC_TEXCOORD, 2, GL_FLOAT, GL_FALSE, n_bytes_per_vertex, BUFFER_OFFSET(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	free(geom_obj_vertices[geom_obj_ID]);
+}
+
+void draw_geom_obj(int geom_obj_ID) {
+	glBindVertexArray(geom_obj_VAO[geom_obj_ID]);
+	glDrawArrays(GL_TRIANGLES, 0, 3 * geom_obj_n_triangles[geom_obj_ID]);
+	glBindVertexArray(0);
+}
+
+void free_geom_obj(int geom_obj_ID) {
+	glDeleteVertexArrays(1, &geom_obj_VAO[geom_obj_ID]);
+	glDeleteBuffers(1, &geom_obj_VBO[geom_obj_ID]);
+}
+// END OF DRAW CAR BODY, WHEEL, NUT
+
+
+// DRAW CAR OBJECTS
+#define rad 1.7f
+#define ww 1.0f
+void draw_wheel_and_nut(int cam_index) {
+	// angle is used in Hierarchical_Car_Correct later
+	int i;
+
+	glUniform3f(loc_primitive_color, 0.000f, 0.808f, 0.820f); // color name: DarkTurquoise
+	draw_geom_obj(GEOM_OBJ_ID_CAR_WHEEL); // draw wheel
+
+	for (i = 0; i < 5; i++) {
+		ModelMatrix_CAR_NUT = glm::rotate(ModelMatrix_CAR_WHEEL, TO_RADIAN*72.0f*i, glm::vec3(0.0f, 0.0f, 1.0f));
+		ModelMatrix_CAR_NUT = glm::translate(ModelMatrix_CAR_NUT, glm::vec3(rad - 0.5f, 0.0f, ww));
+		ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_NUT;
+		glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+		glUniform3f(loc_primitive_color, 0.690f, 0.769f, 0.871f); // color name: LightSteelBlue
+		draw_geom_obj(GEOM_OBJ_ID_CAR_NUT); // draw i-th nut
+	}
+}
+
+void draw_car_dummy(int cam_index) {
+	//ModelMatrix_CAR_BODY = glm::rotate(glm::mat4(1.0f), -rotation_angle_car, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_CAR_BODY = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 4.5f));
+	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
+
+	//if (camera_type == CAMERA_DRIVER) set_ViewMatrix_for_driver();
+
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_BODY;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glUniform3f(loc_primitive_color, 0.498f, 1.000f, 0.831f); // color name: Aquamarine
+	draw_geom_obj(GEOM_OBJ_ID_CAR_BODY); // draw body
+
+	glLineWidth(2.0f);
+	draw_axes(cam_index); // draw MC axes of body
+	glLineWidth(1.0f);
+
+	ModelMatrix_CAR_DRIVER = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.0f, 0.5f, 2.5f));
+	ModelMatrix_CAR_DRIVER = glm::rotate(ModelMatrix_CAR_DRIVER, TO_RADIAN*90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_DRIVER;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	glLineWidth(5.0f);
+	draw_axes(cam_index); // draw camera frame at driver seat
+	glLineWidth(1.0f);
+
+	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.9f, -3.5f, 4.5f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_wheel_and_nut(cam_index);  // draw wheel 0
+
+	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(3.9f, -3.5f, 4.5f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_wheel_and_nut(cam_index);  // draw wheel 1
+
+	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.9f, -3.5f, -4.5f));
+	ModelMatrix_CAR_WHEEL = glm::scale(ModelMatrix_CAR_WHEEL, glm::vec3(1.0f, 1.0f, -1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_wheel_and_nut(cam_index);  // draw wheel 2
+
+	ModelMatrix_CAR_WHEEL = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(3.9f, -3.5f, -4.5f));
+	ModelMatrix_CAR_WHEEL = glm::scale(ModelMatrix_CAR_WHEEL, glm::vec3(1.0f, 1.0f, -1.0f));
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_WHEEL;
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+	draw_wheel_and_nut(cam_index);  // draw wheel 3
+}
+
+
+// END OF DRAW CAR OBJECTS
 
 void cleanup_OpenGL_stuffs(void) {
 	for (int i = 0; i < n_static_objects; i++) {
