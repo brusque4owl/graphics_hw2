@@ -313,16 +313,17 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 
-	case 'r':	// view driver camera
-		view_driver = 1 - view_driver;
-		glutPostRedisplay();
-		break;
-
 	case 'm':					// change mode to moving_car
 		glutMotionFunc(motion_car);
 		glutPostRedisplay();
 		break;
 
+	case 'r':	// view driver camera
+		view_driver = 1 - view_driver;
+		glutPostRedisplay();
+		break;
+
+	/*
 	case 'c':
 		flag_cull_face = (flag_cull_face + 1) % 3;
 		switch (flag_cull_face) {
@@ -371,7 +372,7 @@ void keyboard(unsigned char key, int x, int y) {
 		}
 		glutPostRedisplay();
 		break;
-		/*
+
 	case 't':	// used for debugging tiger path
 		camera[0].prp = glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z+500.0f);		// 카메라 위치
 		camera[0].vrp = glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z);		// 바라보는 곳
@@ -382,15 +383,13 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		glutPostRedisplay();
 		break;
-		*/
-		/*
+
 	case ']':
 		glutMotionFunc(motion_1);
 		glutPostRedisplay();
 		break;
 		*/
 	}
-
 }
 
 void reshape(int width, int height) {
@@ -1008,8 +1007,8 @@ void prepare_shader_program(void) {
 
 void initialize_camera(void) {
 	// initialize the 8th camera - driver_cam
-	camera[8].prp = glm::vec3(car_pos.x, car_pos.y, car_pos.z);		// 카메라 위치
-	camera[8].vrp = glm::vec3(car_pos.x, car_pos.y - 50.0f, car_pos.z);		// 바라보는 곳
+	camera[8].prp = glm::vec3(car_pos.x-3.0f, car_pos.y+0.5f, car_pos.z+2.5f);		// 카메라 위치
+	camera[8].vrp = glm::vec3(car_pos.x-3.0f, car_pos.y+0.5f - 50.0f, car_pos.z+2.5f);		// 바라보는 곳
 	camera[8].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	glm::vec3 uaxis_driver, vaxis_driver, naxis_driver;
