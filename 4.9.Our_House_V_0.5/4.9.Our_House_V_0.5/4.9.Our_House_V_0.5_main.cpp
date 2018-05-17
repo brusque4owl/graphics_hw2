@@ -239,7 +239,7 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		printf("camera_selected = %d\n", camera_selected);
 		printf("fov_y = %f\n", camera[camera_selected].fov_y);
-		printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
+		//printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
 
 		define_frustum_line(); 	// change viewing volume with fov_y
 		glutPostRedisplay();
@@ -253,7 +253,7 @@ void keyboard(unsigned char key, int x, int y) {
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 		printf("camera_selected = %d\n", camera_selected);
 		printf("fov_y = %f\n", camera[camera_selected].fov_y);
-		printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
+		//printf("asp_ratio = %f\n", camera[camera_selected].aspect_ratio);
 
 		define_frustum_line();	// change viewing volume with fov_y
 		glutPostRedisplay();
@@ -448,12 +448,202 @@ void reshape(int width, int height) {
 
 unsigned int leftbutton_pressed = 0;
 int prevx, prevy;
-
+int path_num = 0;
 // 호랑이 움직임관련 함수
 void timer_scene(int timestamp_scene) {
 	tiger_data.cur_frame = timestamp_scene % N_TIGER_FRAMES;
-	//car_pos.x = car_pos.x + 1;
 	//tiger_data.rotation_angle = (timestamp_scene % 360)*TO_RADIAN;
+
+	//// Move tiger along path
+	switch(path_num){
+	case 0:
+		tiger_pos.x = tiger_pos.x + tiger_point[0].mov_x;
+		tiger_data.rotation_angle = tiger_point[0].rot_angle*TO_RADIAN;
+		if(tiger_pos.x >= tiger_point[0].x) path_num=1;
+		break;
+	case 1:
+		if (tiger_pos.x < tiger_point[1].x) tiger_pos.x = tiger_pos.x + tiger_point[1].mov_x*(tiger_point[1].x - tiger_point[0].x) / (tiger_point[1].y - tiger_point[0].y);
+		tiger_pos.y = tiger_pos.y + tiger_point[1].mov_y;
+		tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[1].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[1].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[1].rot_angle*tiger_point[1].smooth / SMOOTH_ROT) *TO_RADIAN;
+			tiger_point[1].smooth++;
+		}
+
+		if(tiger_pos.y >= tiger_point[1].y) path_num=2;
+		break;
+	case 2:
+		if (tiger_pos.y < tiger_point[2].y) tiger_pos.y = tiger_pos.y + tiger_point[2].mov_y*(tiger_point[2].y - tiger_point[1].y) / (tiger_point[2].x - tiger_point[1].x);
+		tiger_pos.x = tiger_pos.x + tiger_point[2].mov_x;
+		tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[2].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[2].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[1].rot_angle
+					- (tiger_point[1].rot_angle - tiger_point[2].rot_angle)*tiger_point[2].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[2].smooth++;
+		}
+
+		if(tiger_pos.x >= tiger_point[2].x) path_num=3;
+		break;
+	case 3:
+		tiger_pos.y = tiger_pos.y + tiger_point[3].mov_y;
+		tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[3].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[3].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[2].rot_angle
+					+ (tiger_point[3].rot_angle - tiger_point[2].rot_angle)*tiger_point[3].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[3].smooth++;
+		}
+
+		if(tiger_pos.y >= tiger_point[3].y) path_num=4;
+		break;
+	case 4:
+		tiger_pos.y = tiger_pos.y - tiger_point[4].mov_y;
+		tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[4].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[4].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[3].rot_angle
+					+ (tiger_point[4].rot_angle - tiger_point[3].rot_angle)*tiger_point[4].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[4].smooth++;
+		}
+
+		if(tiger_pos.y <= tiger_point[4].y) path_num=5;
+		break;
+	case 5:
+		if (tiger_pos.y > tiger_point[5].y) tiger_pos.y = tiger_pos.y - tiger_point[5].mov_y*(tiger_point[5].y - tiger_point[4].y) / (tiger_point[5].x - tiger_point[4].x);
+		tiger_pos.x = tiger_pos.x - tiger_point[5].mov_x;
+		tiger_data.rotation_angle = (-tiger_point[5].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[5].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (-tiger_point[5].rot_angle*tiger_point[5].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[5].smooth++;
+		}
+
+		if(tiger_pos.x <= tiger_point[5].x) path_num=6;
+		break;
+	case 6:
+		tiger_pos.y = tiger_pos.y - tiger_point[6].mov_y;
+		tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[6].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[6].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (-tiger_point[5].rot_angle + (tiger_point[5].rot_angle)*tiger_point[6].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[6].smooth++;
+		}
+
+		if(tiger_pos.y <= tiger_point[6].y) path_num=7;
+		break;
+	case 7:
+		if (tiger_pos.y > tiger_point[7].y) tiger_pos.y = tiger_pos.y - tiger_point[7].mov_y*((tiger_point[7].x - tiger_point[6].x) / (tiger_point[7].y - tiger_point[6].y));
+		tiger_pos.x = tiger_pos.x - tiger_point[7].mov_x;
+		tiger_data.rotation_angle = (-tiger_point[7].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[7].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (-tiger_point[7].rot_angle*tiger_point[7].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[7].smooth++;
+		}
+
+		if(tiger_pos.x <= tiger_point[7].x) path_num=8;
+		break;
+	case 8:
+		tiger_pos.y = tiger_pos.y - tiger_point[7].mov_y;
+		tiger_data.rotation_angle = (tiger_point[0].rot_angle + tiger_point[8].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[8].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (-tiger_point[7].rot_angle + (tiger_point[7].rot_angle)*tiger_point[8].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[8].smooth++;
+		}
+
+		if(tiger_pos.y <= tiger_point[8].y) path_num=9;
+		break;
+	case 9:
+		tiger_pos.y = tiger_pos.y + tiger_point[9].mov_y;
+		tiger_data.rotation_angle = (tiger_point[9].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[9].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (-(tiger_point[9].rot_angle)*tiger_point[9].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[9].smooth++;
+		}
+
+		if(tiger_pos.y >= tiger_point[9].y) path_num=10;
+		break;
+	case 10:
+		if (tiger_pos.x < tiger_point[10].x) tiger_pos.x = tiger_pos.x + tiger_point[10].mov_x*((tiger_point[10].x - tiger_point[9].x) / (tiger_point[10].y - tiger_point[9].y));
+		tiger_pos.y = tiger_pos.y + tiger_point[10].mov_y;
+		tiger_data.rotation_angle = (180.0f - tiger_point[10].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[10].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (180.0f - tiger_point[10].rot_angle*tiger_point[10].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[10].smooth++;
+		}
+
+		if(tiger_pos.y >= tiger_point[10].y) path_num=11;
+		break;
+	case 11:
+		tiger_pos.y = tiger_pos.y + tiger_point[11].mov_y;
+		tiger_data.rotation_angle = (180.0f)*TO_RADIAN;
+
+		if (tiger_point[11].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = ((180.0f - tiger_point[10].rot_angle) + tiger_point[10].rot_angle*tiger_point[11].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[11].smooth++;
+		}
+
+		if(tiger_pos.y >= tiger_point[11].y) path_num=12;
+		break;
+	case 12:
+		tiger_pos.x = tiger_pos.x - tiger_point[12].mov_x;
+		tiger_data.rotation_angle = (180.0f + tiger_point[12].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[12].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (180.0f + tiger_point[12].rot_angle*tiger_point[12].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[12].smooth++;
+		}
+
+		if(tiger_pos.x <= tiger_point[12].x) path_num=13;
+		break;
+	case 13:
+		tiger_pos.y = tiger_pos.y - tiger_point[13].mov_y;
+		tiger_data.rotation_angle = (0.0f)*TO_RADIAN;
+
+		if (tiger_point[13].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (270.0f + tiger_point[13].rot_angle*tiger_point[13].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[13].smooth++;
+		}
+
+		if(tiger_pos.y <= tiger_point[13].y) path_num=14;
+		break;
+	case 14:
+		tiger_pos.x = tiger_pos.x - tiger_point[14].mov_x;
+		tiger_data.rotation_angle = tiger_point[14].rot_angle*TO_RADIAN;
+
+		if (tiger_point[14].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (tiger_point[14].rot_angle*tiger_point[14].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[14].smooth++;
+		}
+
+		if(tiger_pos.x <= tiger_point[14].x) path_num=15;
+		break;
+	case 15:
+		tiger_pos.x = tiger_pos.x - tiger_point[15].mov_x;
+		tiger_data.rotation_angle = (-90.0f + tiger_point[15].rot_angle)*TO_RADIAN;
+
+		if (tiger_point[15].smooth<SMOOTH_ROT) {
+			tiger_data.rotation_angle = (-90.0f + tiger_point[15].rot_angle*tiger_point[15].smooth / SMOOTH_ROT)*TO_RADIAN;
+			tiger_point[15].smooth++;
+		}
+
+		if(tiger_pos.x <= tiger_point[15].x) path_num=16;
+		break;
+	default:
+		tiger_pos.x = 30.5f; tiger_pos.y = 22.2f; tiger_pos.z = 0.0f;
+		for (int i = 0; i<NUM_POINTS; i++) {
+			tiger_point[i].timer = 0.0f;
+			tiger_point[i].smooth = 0;
+		}
+		path_num=0;
+		break;
+	}
+	////
 	glutPostRedisplay();
 	glutTimerFunc(100, timer_scene, (timestamp_scene + 1) % INT_MAX);
 }
@@ -530,10 +720,11 @@ void motion_translate_uaxis(int x, int y) {
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
-		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+		/*printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+			*/
 		glutPostRedisplay();
 	}
 }
@@ -557,10 +748,12 @@ void motion_translate_vaxis(int x, int y) {
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
+		/*
 		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+			*/
 		glutPostRedisplay();
 	}
 }
@@ -589,10 +782,11 @@ void motion_translate_naxis(int x, int y) {
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
-		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+		/*printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+			*/
 		glutPostRedisplay();
 	}
 }
@@ -623,10 +817,11 @@ void motion_rotate_uaxis(int x, int y) {
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
-		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+		/*printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+			*/
 		glutPostRedisplay();
 	}
 }
@@ -657,10 +852,11 @@ void motion_rotate_vaxis(int x, int y) {
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
-		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+		/*printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+			*/
 		glutPostRedisplay();
 	}
 }
@@ -688,10 +884,11 @@ void motion_rotate_naxis(int x, int y) {
 
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
 
-		printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
+		/*printf("prp.x = %f\t prp.y = %f\t prp.z = %f\nvrp.x = %f\t vrp.y = %f\t vrp.z = %f\nvup.x = %f\t vup.y = %f\t vup.z = %f\n\n",
 			camera[camera_selected].prp.x, camera[camera_selected].prp.y, camera[camera_selected].prp.z,
 			camera[camera_selected].vrp.x, camera[camera_selected].vrp.y, camera[camera_selected].vrp.z,
 			camera[camera_selected].vup.x, camera[camera_selected].vup.y, camera[camera_selected].vup.z);
+			*/
 		glutPostRedisplay();
 	}
 }
@@ -796,7 +993,7 @@ void initialize_camera(void) {
 	camera[0].uaxis = uaxis;
 	camera[0].vaxis = vaxis;
 	camera[0].naxis = naxis;
-	printf("vup.x = %f\tvup.y = %f\tvup.z = %f\n\n", vaxis.x, vaxis.y, vaxis.z);
+	//printf("vup.x = %f\tvup.y = %f\tvup.z = %f\n\n", vaxis.x, vaxis.y, vaxis.z);
 
 	ViewMatrix[0] = glm::lookAt(camera[0].prp, camera[0].vrp, camera[0].vup); //u,v,n벡터를 lookAt으로 세팅
 

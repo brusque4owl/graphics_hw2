@@ -455,7 +455,7 @@ GLuint VBO_frustum_line, VAO_frustum_line;
 GLfloat frustum_line_color[4][3] = { { 1.0f, 1.0f, 0.0f },{ 1.0f, 0.0f, 1.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 1.0f, 1.0f } }; // yellow, magenta
 
 void define_frustum_line(void) {
-	printf("camera[0].far_clip = %f\t camera[0].fov_y = %f\t camera[0].aspect_ratio = %f\n\n", camera[0].far_clip, camera[0].fov_y, camera[0].aspect_ratio);
+	//printf("camera[0].far_clip = %f\t camera[0].fov_y = %f\t camera[0].aspect_ratio = %f\n\n", camera[0].far_clip, camera[0].fov_y, camera[0].aspect_ratio);
 
 	GLfloat Hnear = 2.0f * (tan(camera[0].fov_y *TO_RADIAN / 2.0f) * camera[0].near_clip);
 	GLfloat Wnear = Hnear * camera[0].aspect_ratio;
@@ -591,9 +591,10 @@ typedef struct{
 }TIGER;
 TIGER tiger_pos = {30.5f, 22.3f, 0.0f};
 
-#define TIMER_LENGTH 0.4f
+#define MOV_X 0.4f
+#define MOV_Y 0.4f
 #define TIGER_DEFAULT_ROT 90.0f
-#define SMOOTH_ROT	30
+#define SMOOTH_ROT	10
 typedef struct{
 	float x,y;	// 호랑이가 도달할 점과 그 점까지 갈때 사용할 회전각
 	float mov_x, mov_y;		// 도달할 점까지 움직일 때 쓰이는 값
@@ -602,31 +603,27 @@ typedef struct{
 	float rot_angle;
 }TIGER_POINT;
 #define NUM_POINTS 16
-TIGER_POINT tiger_point[NUM_POINTS] = { { 75.5f, 22.2f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },	// 1st
-								{ 89.1f, 96.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 2nd
-								{ 162.0f, 115.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },		// 3rd
-								{ 162.0f, 130.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },		// 4th
-								{ 162.0f, 110.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },		// 5th
-								{ 125.0f, 100.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },		// 6th
-								{ 125.0f, 75.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 7th
-								{ 115.0f, 63.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 8th
-
-								{ 115.0f, 30.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 9th
-
-								{ 115.0f, 50.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 10th - back to 8th
-								{ 120.0f, 65.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 11th - back to 7th
-								{ 120.0f, 85.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 12th
-								{ 85.0f, 85.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 13th
-								{ 85.0f, 18.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 14th
-								{ 35.5f, 18.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 },			// 15th
-								{ 27.5f, 18.3f, TIMER_LENGTH, TIMER_LENGTH, 0.0f, 0 }			// 16th - dest.
+TIGER_POINT tiger_point[NUM_POINTS] = { 
+	{ 75.5f, 22.2f, MOV_X, MOV_Y, 0.0f, 0 },		// 1st							
+	{ 89.1f, 96.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 2nd							
+	{ 162.0f, 115.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 3rd
+	{ 162.0f, 130.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 4th
+	{ 162.0f, 110.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 5th
+	{ 125.0f, 100.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 6th
+	{ 125.0f, 75.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 7th
+	{ 115.0f, 63.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 8th
+	{ 115.0f, 30.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 9th
+	{ 115.0f, 50.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 10th - back to 8th
+	{ 120.0f, 65.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 11th - back to 7th
+	{ 120.0f, 85.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 12th
+	{ 85.0f, 85.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 13th
+	{ 85.0f, 18.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 14th
+	{ 35.5f, 18.3f, MOV_X, MOV_Y, 0.0f, 0 },		// 15th
+	{ 30.5f, 18.3f, MOV_X, MOV_Y, 0.0f, 0 }			// 16th - dest.
 };
 
 void draw_animated_tiger(int cam_index) {
-	/*
-	ModelViewMatrix[cam_index] = glm::rotate(ViewMatrix[cam_index], -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
-	ModelViewMatrix[cam_index] = glm::translate(ModelViewMatrix[cam_index], glm::vec3(100.0f, 0.0f, 0.0f));
-	*/
+
 	int i;
 	float rot = 15.0f;
 	tiger_point[0].rot_angle = TIGER_DEFAULT_ROT;
@@ -645,289 +642,9 @@ void draw_animated_tiger(int cam_index) {
 	tiger_point[13].rot_angle = TIGER_DEFAULT_ROT;
 	tiger_point[14].rot_angle = -TIGER_DEFAULT_ROT;
 	tiger_point[15].rot_angle = -TIGER_DEFAULT_ROT * 2;
-	ModelViewMatrix[cam_index] = glm::rotate(ViewMatrix[cam_index], -tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
-	
-	// go to 1st point
-	if(tiger_point[0].timer < tiger_point[0].x-30.5f){
-		tiger_pos.x = tiger_pos.x + tiger_point[0].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], tiger_point[0].rot_angle*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));
-		tiger_point[0].timer += TIMER_LENGTH;
-	}
-	// go to 2nd point
-	else if(tiger_point[1].timer < tiger_point[1].y-tiger_point[0].y){
-		if(tiger_pos.x < tiger_point[1].x) tiger_pos.x = tiger_pos.x + tiger_point[1].mov_x*(tiger_point[1].x - tiger_point[0].x)/(tiger_point[1].y - tiger_point[0].y);
-		tiger_pos.y = tiger_pos.y + tiger_point[1].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if(tiger_point[1].smooth<SMOOTH_ROT){
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[1].rot_angle*tiger_point[1].smooth/SMOOTH_ROT) *TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[1].smooth++;
-		}
-		else{
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], 
-				(tiger_point[0].rot_angle + tiger_point[1].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[1].timer += TIMER_LENGTH;
-	}
-	// go to 3rd point
-	else if(tiger_point[2].timer < tiger_point[2].x-tiger_point[1].x){
-		if (tiger_pos.y < tiger_point[2].y) tiger_pos.y = tiger_pos.y + tiger_point[2].mov_y*(tiger_point[2].y - tiger_point[1].y)/(tiger_point[2].x - tiger_point[1].x);
-		tiger_pos.x = tiger_pos.x + tiger_point[2].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[2].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[1].rot_angle
-					-(tiger_point[1].rot_angle - tiger_point[2].rot_angle)*tiger_point[2].smooth/SMOOTH_ROT)*TO_RADIAN, // 1에서 돌릴 각도 - 2에서 돌릴 각도를 시계방향으로 회전하려고 -붙임
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[2].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[2].rot_angle)*TO_RADIAN,  // if식에서 smooth/SMOOTH_ROT가 1이 되면  [1].rot_angle 항은 사라짐
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[2].timer += TIMER_LENGTH;
-	}
-	// go to 4th point
-	else if (tiger_point[3].timer < tiger_point[3].y - tiger_point[2].y) {
-		tiger_pos.y = tiger_pos.y + tiger_point[3].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[3].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[2].rot_angle 
-					+ (tiger_point[3].rot_angle - tiger_point[2].rot_angle)*tiger_point[3].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[3].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[3].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[3].timer += TIMER_LENGTH;
-	}
-	// go to 5th point
-	else if (tiger_point[4].timer < tiger_point[3].y - tiger_point[4].y) {
-		tiger_pos.y = tiger_pos.y - tiger_point[4].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[4].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[3].rot_angle
-					+ (tiger_point[4].rot_angle - tiger_point[3].rot_angle)*tiger_point[4].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[4].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[4].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[4].timer += TIMER_LENGTH;
-	}
-	// go to 6th point
-	else if (tiger_point[5].timer < tiger_point[4].x - tiger_point[5].x) {
-		if (tiger_pos.y > tiger_point[5].y) tiger_pos.y = tiger_pos.y - tiger_point[5].mov_y*(tiger_point[5].y - tiger_point[4].y) / (tiger_point[5].x - tiger_point[4].x);
-		tiger_pos.x = tiger_pos.x - tiger_point[5].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[5].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-tiger_point[5].rot_angle*tiger_point[5].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-				
-			tiger_point[5].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-tiger_point[5].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[5].timer += TIMER_LENGTH;
-	}
-	// go to 7th point
-	else if (tiger_point[6].timer < tiger_point[5].y - tiger_point[6].y) {
-		tiger_pos.y = tiger_pos.y - tiger_point[6].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[6].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-tiger_point[5].rot_angle + (tiger_point[5].rot_angle)*tiger_point[6].smooth / SMOOTH_ROT)*TO_RADIAN,  // 6th point에서 회전한만큼 다시 돌아와야함.
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[6].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[6].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[6].timer += TIMER_LENGTH;
-	}
-	// go to 8th point
-	else if (tiger_point[7].timer < tiger_point[6].x - tiger_point[7].x) {
-		if (tiger_pos.y > tiger_point[7].y) tiger_pos.y = tiger_pos.y - tiger_point[7].mov_y*((tiger_point[7].x - tiger_point[6].x)/ (tiger_point[7].y - tiger_point[6].y));
-		tiger_pos.x = tiger_pos.x - tiger_point[7].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[7].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-tiger_point[7].rot_angle*tiger_point[7].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[7].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-tiger_point[7].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[7].timer += TIMER_LENGTH;
-	}
-	// go to 9th point
-	else if (tiger_point[8].timer < tiger_point[7].y - tiger_point[8].y) {
-		tiger_pos.y = tiger_pos.y - tiger_point[7].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[8].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-tiger_point[7].rot_angle + (tiger_point[7].rot_angle)*tiger_point[8].smooth / SMOOTH_ROT)*TO_RADIAN,  // 7th point에서 회전한만큼 다시 돌아와야함.
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[8].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[0].rot_angle + tiger_point[8].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[8].timer += TIMER_LENGTH;
-	}
-	// go to 10th point - BACK to 8th point
-	else if (tiger_point[9].timer < tiger_point[9].y - tiger_point[8].y) {
-		tiger_pos.y = tiger_pos.y + tiger_point[9].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[9].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-(tiger_point[9].rot_angle)*tiger_point[9].smooth / SMOOTH_ROT)*TO_RADIAN,  // 7th point에서 회전한만큼 다시 돌아와야함.
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[9].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[9].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[9].timer += TIMER_LENGTH;
-	}
-	// go to 11th point - BACK to 7th point
-	else if (tiger_point[10].timer < tiger_point[10].y - tiger_point[9].y) {
-		if (tiger_pos.x < tiger_point[10].x) tiger_pos.x = tiger_pos.x + tiger_point[10].mov_x*((tiger_point[10].x - tiger_point[9].x) / (tiger_point[10].y - tiger_point[9].y));
-		tiger_pos.y = tiger_pos.y + tiger_point[10].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[10].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(180.0f - tiger_point[10].rot_angle*tiger_point[10].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[10].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(180.0f - tiger_point[10].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[10].timer += TIMER_LENGTH;
-	}
-	// go to 12th point
-	else if (tiger_point[11].timer < tiger_point[11].y - tiger_point[10].y) {
-		tiger_pos.y = tiger_pos.y + tiger_point[11].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[11].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				((180.0f - tiger_point[10].rot_angle) + tiger_point[10].rot_angle*tiger_point[11].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[11].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(180.0f)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[11].timer += TIMER_LENGTH;
-	}
-	// go to 13th point
-	else if (tiger_point[12].timer < tiger_point[11].x - tiger_point[12].x) {
-		tiger_pos.x = tiger_pos.x - tiger_point[12].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[12].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(180.0f + tiger_point[12].rot_angle*tiger_point[12].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[12].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(180.0f + tiger_point[12].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[12].timer += TIMER_LENGTH;
-	}
-	// go to 14th point
-	else if (tiger_point[13].timer < tiger_point[12].y - tiger_point[13].y) {
-		tiger_pos.y = tiger_pos.y - tiger_point[13].mov_y;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[13].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(270.0f + tiger_point[13].rot_angle*tiger_point[13].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[13].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(0.0f)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[13].timer += TIMER_LENGTH;
-	}
-	// go to 15th point
-	else if (tiger_point[14].timer < tiger_point[13].x - tiger_point[14].x) {
-		tiger_pos.x = tiger_pos.x - tiger_point[14].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[14].smooth<SMOOTH_ROT) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(tiger_point[14].rot_angle*tiger_point[14].smooth / SMOOTH_ROT)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[14].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				tiger_point[14].rot_angle*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[14].timer += TIMER_LENGTH;
-	}
-	// go to 16th point
-	else if (tiger_point[15].timer < tiger_point[14].x - tiger_point[15].x) {
-		tiger_pos.x = tiger_pos.x - tiger_point[15].mov_x;
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		if (tiger_point[15].smooth<20) {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-90.0f + tiger_point[15].rot_angle*tiger_point[15].smooth / 20)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-			tiger_point[15].smooth++;
-		}
-		else {
-			ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],
-				(-90.0f + tiger_point[15].rot_angle)*TO_RADIAN,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		tiger_point[15].timer += TIMER_LENGTH;
-	}
-	// initialize positions and timer of tiger
-	else{
-		tiger_pos.x = 30.5f; tiger_pos.y = 22.2f; tiger_pos.z = 0.0f;
-		for(i=0;i<NUM_POINTS;i++){
-			tiger_point[i].timer = 0.0f;
-			tiger_point[i].smooth = 0;
-		}
-		ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
-		ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index],(-90.0f + tiger_point[15].rot_angle)*TO_RADIAN,	glm::vec3(0.0f, 0.0f, 1.0f));
-	}
+
+	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], glm::vec3(tiger_pos.x, tiger_pos.y, tiger_pos.z));
+	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], tiger_data.rotation_angle, glm::vec3(0.0f, 0.0f, 1.0f));
 
 	ModelViewMatrix[cam_index] *= tiger[tiger_data.cur_frame].ModelMatrix[0];	// ModelMatrix[0]만 scale(0.2,0.2,0.2)가 됐으므로 여기는 ModelMatrix[cam_index]가 아니라 ModelMatrix[0]을 써줘야함.
 
@@ -943,9 +660,6 @@ void draw_animated_tiger(int cam_index) {
 	ModelViewProjectionMatrix = glm::scale(ModelViewProjectionMatrix, glm::vec3(20.0f, 20.0f, 20.0f));
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
 }
-
-
-
 
 // DRAW CAR BODY, WHEEL, NUT
 #define N_GEOMETRY_OBJECTS			3
@@ -1132,7 +846,7 @@ int read_path_file(GLfloat **object, char *filename) {
 	float *flt_ptr;
 	FILE *fp;
 
-	fprintf(stdout, "Reading path from the path file %s...\n", filename);
+	//fprintf(stdout, "Reading path from the path file %s...\n", filename);
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "Cannot open the path file %s ...", filename);
@@ -1153,7 +867,7 @@ int read_path_file(GLfloat **object, char *filename) {
 	}
 	fclose(fp);
 
-	fprintf(stdout, "Read %d vertices successfully.\n\n", n_vertices);
+	//fprintf(stdout, "Read %d vertices successfully.\n\n", n_vertices);
 
 	return n_vertices;
 }
@@ -1161,7 +875,7 @@ int read_path_file(GLfloat **object, char *filename) {
 void prepare_path(void) { // Draw path.
 						  //	return;
 	path_n_vertices = read_path_file(&path_vertices, (char *)"Data/path.txt");
-	printf("%d %f\n", path_n_vertices, path_vertices[(path_n_vertices - 1)]);
+	//printf("%d %f\n", path_n_vertices, path_vertices[(path_n_vertices - 1)]);
 	// Initialize vertex array object.
 	glGenVertexArrays(1, &path_VAO);
 	glBindVertexArray(path_VAO);
