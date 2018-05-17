@@ -507,7 +507,7 @@ void define_frustum_line(void) {
 #define WC_FRUSTUM_LINE_LENGTH		1.0f
 void draw_frustum_line(int cam_index) {
 
-	if (cam_index == 0) return;
+	if (cam_index == 0 || cam_index == 8) return;
 	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);
@@ -539,7 +539,7 @@ void draw_frustum_line(int cam_index) {
 // */    END OF FRUSTUM LINE
 
 void draw_main_camera_axes(int cam_index) {
-	if(cam_index==0) return;
+	if(cam_index==0 || cam_index==8) return;
 	ModelViewMatrix[cam_index] = glm::translate(ViewMatrix[cam_index], camera[camera_selected].prp);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_u, rotate_axis_u);
 	ModelViewMatrix[cam_index] = glm::rotate(ModelViewMatrix[cam_index], angle_rotate_v, rotate_axis_v);

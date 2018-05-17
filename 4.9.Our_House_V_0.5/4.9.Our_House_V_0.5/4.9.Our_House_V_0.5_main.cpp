@@ -18,7 +18,8 @@ GLint loc_ModelViewProjectionMatrix, loc_primitive_color; // indices of uniform 
 //////////////////////////////////////////////////////////////////
 //////// Setting Cameras /////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
-#define NUMBER_OF_CAMERAS 8		// main, static cctv * 3, dynamic cctv, front view, side view, top view
+bool view_driver=false;			// dirver camera
+#define NUMBER_OF_CAMERAS 9		// main, static cctv * 3, dynamic cctv, front view, side view, top view
 #define CAM_TRANSLATION_SPEED 0.025f
 #define CAM_ROTATION_SPEED 0.1f
 glm::mat4 ViewProjectionMatrix[NUMBER_OF_CAMERAS], ViewMatrix[NUMBER_OF_CAMERAS], ProjectionMatrix[NUMBER_OF_CAMERAS];
@@ -108,7 +109,10 @@ void display(void) {   // 매초마다 불러짐
 
 	switch (view_mode) {
 	case VIEW_CAMERA:
-		display_camera(0);	// main_camera
+		if(view_driver==true)
+			display_camera(8);	// driver_camera
+		else
+			display_camera(0);	// main_camera
 		display_camera(1);	// front_view
 		display_camera(2);	// side_view
 		display_camera(3);	// top_view
@@ -309,6 +313,11 @@ void keyboard(unsigned char key, int x, int y) {
 		glutPostRedisplay();
 		break;
 
+	case 'r':	// view driver camera
+		view_driver = 1 - view_driver;
+		glutPostRedisplay();
+		break;
+
 	case 'm':					// change mode to moving_car
 		glutMotionFunc(motion_car);
 		glutPostRedisplay();
@@ -385,6 +394,15 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void reshape(int width, int height) {
+	// VIEW_DRIVER mode
+	camera[8].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
+													//printf("aspect_ratio = %f\n\n", camera[0].aspect_ratio);
+	viewport[8].x = viewport[8].y = 0;
+	viewport[8].w = (int)(0.70f*width); viewport[8].h = (int)(0.70f*height);
+	ProjectionMatrix[8] = glm::perspective(camera[8].fov_y*TO_RADIAN, camera[8].aspect_ratio, camera[8].near_clip, camera[8].far_clip);
+	ViewProjectionMatrix[8] = ProjectionMatrix[8] * ViewMatrix[8];
+
+
 	// VIEW_CAMERA mode
 	camera[0].aspect_ratio = (float)width / height;	// viewport비율과 projection비율을 동기화시킴
 													//printf("aspect_ratio = %f\n\n", camera[0].aspect_ratio);
@@ -904,26 +922,32 @@ void motion_car(int x, int y){
 		delx = (float)(x - prevx), dely = -(float)(y - prevy);
 		prevx = x, prevy = y;
 
+		mat4_tmp = glm::translate(glm::mat4(1.0f), camera[8].prp);
+
 		// Movement forward, backward
 		// the 1st quadrant(270~360 degree)
 		if (car_pos.rot >= 270.0f && car_pos.rot<360.0f) {
 			car_pos.x -= dely * car_delta_x * CAM_ROT_SENSITIVITY;
 			car_pos.y += dely * car_delta_y * CAM_ROT_SENSITIVITY;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(-dely * car_delta_x * CAM_ROT_SENSITIVITY, dely * car_delta_y * CAM_ROT_SENSITIVITY, 0.0f));
 		}
 		// the 2nd quadrant(0~89)
 		else if (car_pos.rot >= 0.0f && car_pos.rot<90.0f) {
 			car_pos.x -= dely * car_delta_x * CAM_ROT_SENSITIVITY;
 			car_pos.y -= dely * car_delta_y * CAM_ROT_SENSITIVITY;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(-dely * car_delta_x * CAM_ROT_SENSITIVITY, -dely * car_delta_y * CAM_ROT_SENSITIVITY, 0.0f));
 		}
 		// the 3rd quadrant(90~179)
 		else if (car_pos.rot >= 90.0f && car_pos.rot<180.0f) {
 			car_pos.x += dely * car_delta_x * CAM_ROT_SENSITIVITY;
 			car_pos.y -= dely * car_delta_y * CAM_ROT_SENSITIVITY;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(dely * car_delta_x * CAM_ROT_SENSITIVITY, -dely * car_delta_y * CAM_ROT_SENSITIVITY, 0.0f));
 		}
 		// the 4th quadrant(180~269)
 		else {
 			car_pos.x += dely * car_delta_x * CAM_ROT_SENSITIVITY;
 			car_pos.y += dely * car_delta_y * CAM_ROT_SENSITIVITY;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(dely * car_delta_x * CAM_ROT_SENSITIVITY, dely * car_delta_y * CAM_ROT_SENSITIVITY, 0.0f));
 		}
 		car_pos.dist += dely * CAM_ROT_SENSITIVITY;
 		if(dely!=0.0f)	car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;	// 바퀴 회전각 = 이동거리*180/(PI*radius)
@@ -933,6 +957,24 @@ void motion_car(int x, int y){
 		if (car_pos.rot >= 360.0f) car_pos.rot = car_pos.rot - 360.0f;
 		if (car_pos.rot < 0.0f) car_pos.rot = 360.0f + car_pos.rot;
 
+		//원점으로 가서 회전 및 이동 후 다시 돌아온다.
+		mat4_tmp = glm::rotate(mat4_tmp, -delx * CAM_ROT_SENSITIVITY *TO_RADIAN, camera[8].vup);
+		mat4_tmp = glm::translate(mat4_tmp, -camera[8].prp);
+
+		// camera 업데이트
+		camera[8].prp = glm::vec3(mat4_tmp*glm::vec4(camera[8].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[8].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[8].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[8].vup = glm::vec3(mat4_tmp*glm::vec4(camera[8].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+
+		ViewMatrix[8] = glm::lookAt(camera[8].prp, camera[8].vrp, camera[8].vup);
+		ViewProjectionMatrix[8] = ProjectionMatrix[8] * ViewMatrix[8];
+		///////////////////////
+		printf("prp.x = %f\t prp.y = %f\t prp.z =%f\n", camera[8].prp.x, camera[8].prp.y, camera[8].prp.z);
+		printf("vrp.x = %f\t vrp.y = %f\t vrp.z =%f\n", camera[8].vrp.x, camera[8].vrp.y, camera[8].vrp.z);
+		printf("vup.x = %f\t vup.y = %f\t vup.z =%f\n", camera[8].vup.x, camera[8].vup.y, camera[8].vup.z);
+		printf("car_pos.x = %f\t car_pos.y = %f\t car_pos.z =%f\n", car_pos.x, car_pos.y, car_pos.z);
+		printf("rotate = %f\n", -delx * CAM_ROT_SENSITIVITY);
+		printf("car_pos.rot = %f\n", car_pos.rot);
 		glutPostRedisplay();
 	}
 }
@@ -965,6 +1007,37 @@ void prepare_shader_program(void) {
 }
 
 void initialize_camera(void) {
+	// initialize the 8th camera - driver_cam
+	camera[8].prp = glm::vec3(car_pos.x, car_pos.y, car_pos.z);		// 카메라 위치
+	camera[8].vrp = glm::vec3(car_pos.x, car_pos.y - 50.0f, car_pos.z);		// 바라보는 곳
+	camera[8].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	glm::vec3 uaxis_driver, vaxis_driver, naxis_driver;
+	naxis_driver = camera[8].prp - camera[8].vrp;
+	naxis_driver = glm::normalize(naxis_driver);
+
+	uaxis_driver = glm::cross(camera[8].vup, naxis_driver);
+	uaxis_driver = glm::normalize(uaxis_driver);
+
+	vaxis_driver = glm::cross(naxis_driver, uaxis_driver);
+	vaxis_driver = glm::normalize(vaxis_driver);
+
+
+	camera[8].uaxis = uaxis_driver;
+	camera[8].vaxis = vaxis_driver;
+	camera[8].naxis = naxis_driver;
+
+	ViewMatrix[8] = glm::lookAt(camera[8].prp, camera[8].vrp, camera[8].vup); //u,v,n벡터를 lookAt으로 세팅
+
+	camera[8].fov_y = 30.0f;
+	camera[8].aspect_ratio = 1.5f; // will be set when the viewing window popped up.
+	camera[8].near_clip = 10.0f;
+	camera[8].far_clip = 150.0f; // 1500.0f;  // for debug
+	camera[8].zoom_factor = 1.0f; // will be used for zoomming in and out.
+	printf("prp.x = %f\t prp.y = %f\t prp.z =%f\n", camera[8].prp.x, camera[8].prp.y, camera[8].prp.z);
+	printf("vrp.x = %f\t vrp.y = %f\t vrp.z =%f\n", camera[8].vrp.x, camera[8].vrp.y, camera[8].vrp.z);
+	printf("vup.x = %f\t vup.y = %f\t vup.z =%f\n", camera[8].vup.x, camera[8].vup.y, camera[8].vup.z);
+
 	// initialize the 0th camera.
 	/*
 	camera[0].prp = glm::vec3(202.0f, 38.0f, 14.0f);		// 카메라 위치
