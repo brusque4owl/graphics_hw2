@@ -138,6 +138,7 @@ void motion_1(int x, int y);
 void motion_car(int x, int y);
 
 #define CAR_MOV 1.0f
+/*
 void arrow_key(int key, int x, int y){
 	float delta_x, delta_y;
 	delta_x = abs(cos(car_pos.rot*TO_RADIAN));
@@ -202,7 +203,7 @@ void arrow_key(int key, int x, int y){
 		break;
 	}
 }
-
+*/
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
 
@@ -283,7 +284,7 @@ void keyboard(unsigned char key, int x, int y) {
 			camera[0].prp = glm::vec3(212.778366f, 163.684006f, 11.367419f);		// 카메라 위치
 			camera[0].vrp = glm::vec3(212.100739f, 115.430161f, 12.360538f);		// 바라보는 곳
 			camera[0].vup = init_camera_vup;
-			camera[camera_selected].fov_y = 30.0f;
+			camera[0].fov_y = 30.0f;
 			angle_rotate_u = 0.0f;
 			angle_rotate_v = 0.0f;
 			angle_rotate_n = 0.0f;
@@ -304,6 +305,7 @@ void keyboard(unsigned char key, int x, int y) {
 		camera[camera_selected].zoom_factor = 1.0f;
 		ProjectionMatrix[camera_selected] = glm::perspective(camera[camera_selected].fov_y*TO_RADIAN, camera[camera_selected].aspect_ratio, camera[camera_selected].near_clip, camera[camera_selected].far_clip);
 		ViewProjectionMatrix[camera_selected] = ProjectionMatrix[camera_selected] * ViewMatrix[camera_selected];
+		define_frustum_line();	// change viewing volume with fov_y
 		glutPostRedisplay();
 		break;
 
@@ -319,7 +321,8 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 
 	case 'r':	// view driver camera
-		view_driver = 1 - view_driver;
+		if(view_mode==VIEW_CAMERA)
+			view_driver = 1 - view_driver;
 		glutPostRedisplay();
 		break;
 
@@ -986,7 +989,7 @@ void register_callbacks(void) {
 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
-	glutSpecialFunc(arrow_key);
+	//glutSpecialFunc(arrow_key);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(100, timer_scene, 0);
 	glutCloseFunc(cleanup_OpenGL_stuffs);
@@ -1128,8 +1131,8 @@ void initialize_camera(void) {
 	camera[3].near_clip = 930.0f;    // 1200 - (50 + 220)  - 천정에서 220 더
 	camera[3].far_clip = 1220.0f;     // 1200 + (0 + 20)   - 바닥에서 20 더
 
-									  // VIEW_CCTV
-									  // static cctv 1
+	// VIEW_CCTV
+	// static cctv 1
 	camera[4].prp = glm::vec3(57.0f, 145.0f, 45.0f);	// 카메라 위치
 	camera[4].vrp = glm::vec3(41.0f, 137.0f, 26.0f);		// 바라보는 곳
 	camera[4].vup = glm::vec3(0.0f, 0.0f, 1.0f);

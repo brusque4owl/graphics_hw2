@@ -794,11 +794,11 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	glUniform3f(loc_primitive_color, 0.498f, 1.000f, 0.831f); // color name: Aquamarine
 	draw_geom_obj(GEOM_OBJ_ID_CAR_BODY); // draw body
 
-	
+	/*
 	glLineWidth(2.0f);
 	draw_axes_car(cam_index); // draw MC axes of body
 	glLineWidth(1.0f);
-
+	*/
 	ModelMatrix_CAR_DRIVER = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.0f, 0.5f, 2.5f));
 	ModelMatrix_CAR_DRIVER = glm::rotate(ModelMatrix_CAR_DRIVER, TO_RADIAN*90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_DRIVER;
