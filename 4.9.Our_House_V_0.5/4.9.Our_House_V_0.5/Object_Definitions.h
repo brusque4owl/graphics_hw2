@@ -757,7 +757,21 @@ typedef struct __car_position{
 	float dist;	// 이동거리
 	float wheel_rot; // 바퀴 전후 회전각
 }CAR_POS;
-CAR_POS car_pos = {50.0f, 140.0f, 4.5f, 90.0f, 0.0f};
+CAR_POS car_pos = {50.0f, 140.0f, 4.5f, 0.0f, 0.0f};
+#define NUM_CAR_POINTS 5
+typedef struct {
+	float x, y;	
+	float mov_x, mov_y;
+	float rot_angle;
+}CAR_POINT;
+CAR_POINT car_point[NUM_CAR_POINTS] = {
+{ 50.0f, 140.0f, MOV_X, MOV_Y, 0.0f },		// 0th
+{ 30.0f, 130.0f, MOV_X, MOV_Y, 0.0f},		// 1st
+{ 20.0f, 115.0f, MOV_X, MOV_Y, 0.0f },		// 2nd
+{ 20.0f, 90.0f, MOV_X, MOV_Y, 0.0f},		// 3rd
+{ 35.0f, 80.0f, MOV_X, MOV_Y, 0.0f },		// 4th
+};
+
 // DRAW CAR OBJECTS
 #define rad 1.7f
 #define ww 1.0f
@@ -785,7 +799,6 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	ModelMatrix_CAR_BODY = glm::translate(glm::mat4(1.0f), glm::vec3(car_pos.x, car_pos.y, car_pos.z));
 	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, car_pos.rot*TO_RADIAN, glm::vec3(0.0f, 0.0f, 1.0f));  // z축 기준으로 좌우회전가능
 	ModelMatrix_CAR_BODY = glm::rotate(ModelMatrix_CAR_BODY, 90.0f*TO_RADIAN, glm::vec3(1.0f, 0.0f, 0.0f));
-
 	//if (camera_type == CAMERA_DRIVER) set_ViewMatrix_for_driver();
 
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_BODY;
@@ -799,7 +812,7 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 	draw_axes_car(cam_index); // draw MC axes of body
 	glLineWidth(1.0f);
 	*/
-	ModelMatrix_CAR_DRIVER = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.0f, 0.5f, 2.5f));
+	ModelMatrix_CAR_DRIVER = glm::translate(ModelMatrix_CAR_BODY, glm::vec3(-3.0f, 0.5f, 2.5f));	// BODY에서 4.5f올렸으므로 4.5+2.5=7.0f
 	ModelMatrix_CAR_DRIVER = glm::rotate(ModelMatrix_CAR_DRIVER, TO_RADIAN*90.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index] * ModelMatrix_CAR_DRIVER;
 	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
@@ -837,9 +850,9 @@ void draw_car_dummy(int cam_index) {  // 앞쪽이 약간 내려가있음. 뒤쪽은 평평
 // END OF DRAW CAR OBJECTS
 
 // START OF DRAW PATH
-GLuint path_VBO, path_VAO;
-GLfloat *path_vertices;
-int path_n_vertices;
+GLuint path_VBO, path_VAO, car_path_VBO, car_path_VAO;
+GLfloat *path_vertices, *car_path_vertices;
+int path_n_vertices, car_path_n_vertices;
 
 int read_path_file(GLfloat **object, char *filename) {
 	int i, n_vertices;
@@ -872,6 +885,23 @@ int read_path_file(GLfloat **object, char *filename) {
 	return n_vertices;
 }
 
+void prepare_car_path(void) { // Draw path.
+						  //	return;
+	car_path_n_vertices = read_path_file(&car_path_vertices, (char *)"Data/car_path.txt");
+	printf("%d %f\n", car_path_n_vertices, car_path_vertices[(car_path_n_vertices - 1)]);
+	// Initialize vertex array object.
+	glGenVertexArrays(1, &car_path_VAO);
+	glBindVertexArray(car_path_VAO);
+	glGenBuffers(1, &car_path_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, car_path_VBO);
+	glBufferData(GL_ARRAY_BUFFER, car_path_n_vertices * 3 * sizeof(float), car_path_vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(LOC_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 void prepare_path(void) { // Draw path.
 						  //	return;
 	path_n_vertices = read_path_file(&path_vertices, (char *)"Data/path.txt");
@@ -887,6 +917,15 @@ void prepare_path(void) { // Draw path.
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+}
+
+void draw_car_path(int cam_index) {
+	ModelViewProjectionMatrix = ViewProjectionMatrix[cam_index];
+	glUniformMatrix4fv(loc_ModelViewProjectionMatrix, 1, GL_FALSE, &ModelViewProjectionMatrix[0][0]);
+
+	glBindVertexArray(car_path_VAO);
+	glUniform3f(loc_primitive_color, 0.500f, 0.500f, 0.500f); // color name: 
+	glDrawArrays(GL_LINE_STRIP, 0, car_path_n_vertices);
 }
 
 void draw_path(int cam_index) {

@@ -77,6 +77,7 @@ void display_camera(int cam_index) { // display()함수로 인해 매초마다 불러짐.
 	}
 	draw_car_dummy(cam_index);
 	draw_path(cam_index);
+	draw_car_path(cam_index);
 
 	glLineWidth(1.0f);
 
@@ -136,74 +137,10 @@ void motion_rotate_vaxis(int x, int y);
 void motion_rotate_naxis(int x, int y);
 void motion_1(int x, int y);
 void motion_car(int x, int y);
+void motion_car_along_path(int x, int y);
 
 #define CAR_MOV 1.0f
-/*
-void arrow_key(int key, int x, int y){
-	float delta_x, delta_y;
-	delta_x = abs(cos(car_pos.rot*TO_RADIAN));
-	delta_y = abs(sin(car_pos.rot*TO_RADIAN));
 
-	switch(key) {
-	case GLUT_KEY_UP:		// forward
-		// the 1st quadrant(270~360 degree)
-		if(car_pos.rot>=270.0f && car_pos.rot<360.0f){
-			car_pos.x -= delta_x * CAR_MOV;
-			car_pos.y += delta_y * CAR_MOV;
-		}
-		// the 2nd quadrant(0~89)
-		else if (car_pos.rot >= 0.0f && car_pos.rot<90.0f) {
-			car_pos.x -= delta_x * CAR_MOV;
-			car_pos.y -= delta_y * CAR_MOV;
-		}
-		// the 3rd quadrant(90~179)
-		else if (car_pos.rot >= 90.0f && car_pos.rot<180.0f) {
-			car_pos.x += delta_x * CAR_MOV;
-			car_pos.y -= delta_y * CAR_MOV;
-		}
-		// the 4th quadrant(180~269)
-		else{
-			car_pos.x += delta_x * CAR_MOV;
-			car_pos.y += delta_y * CAR_MOV;
-		}
-		car_pos.dist += CAR_MOV;
-		car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;	// 바퀴 회전각 = 이동거리*180/(PI*radius)
-		break;
-	case GLUT_KEY_DOWN:		// backward
-		// the 1st quadrant(270~360 degree)
-		if (car_pos.rot >= 270.0f && car_pos.rot<360.0f) {
-			car_pos.x += delta_x * CAR_MOV;
-			car_pos.y -= delta_y * CAR_MOV;
-		}
-		// the 2nd quadrant(0~89)
-		else if (car_pos.rot >= 0.0f && car_pos.rot<90.0f) {
-			car_pos.x += delta_x * CAR_MOV;
-			car_pos.y += delta_y * CAR_MOV;
-		}
-		// the 3rd quadrant(90~179)
-		else if (car_pos.rot >= 90.0f && car_pos.rot<180.0f) {
-			car_pos.x -= delta_x * CAR_MOV;
-			car_pos.y += delta_y * CAR_MOV;
-		}
-		// the 4th quadrant(180~269)
-		else {
-			car_pos.x -= delta_x * CAR_MOV;
-			car_pos.y -= delta_y * CAR_MOV;
-		}
-		car_pos.dist -= CAR_MOV;
-		car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;
-		break;
-	case GLUT_KEY_LEFT:		// turn left
-		car_pos.rot += 1.0f;
-		if(car_pos.rot >= 360.0f) car_pos.rot = car_pos.rot - 360.0f;
-		break;
-	case GLUT_KEY_RIGHT:	// turn right
-		car_pos.rot -= 1.0f;
-		if (car_pos.rot < 0.0f) car_pos.rot = 360.0f + car_pos.rot;  // 360 + (-1)
-		break;
-	}
-}
-*/
 void keyboard(unsigned char key, int x, int y) {
 	static int flag_cull_face = 0, polygon_fill_on = 0, depth_test_on = 0;
 
@@ -316,7 +253,7 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 
 	case 'm':					// change mode to moving_car
-		glutMotionFunc(motion_car);
+		glutMotionFunc(motion_car_along_path);
 		glutPostRedisplay();
 		break;
 
@@ -913,6 +850,156 @@ void motion_rotate_naxis(int x, int y) {
 	}
 }
 
+int direction;
+void motion_car_along_path(int x, int y) {
+	static float prev_rot = 0.0f;
+	static float del_rot = 0.0f;
+	static int i=0;
+	static bool change_rot = false;
+	glm::mat4 mat4_tmp;
+	glm::vec3 vec3_tmp;
+	float delx, dely;
+	float car_delta, car_delta_x, car_delta_y, car_rot_delta;
+	if(i!=0){
+		car_delta_x = abs(car_path_vertices[i] - car_path_vertices[i-3]);
+		car_delta_y = abs(car_path_vertices[i+1] - car_path_vertices[i+1-3]);
+	}
+	else{
+		car_delta_x = car_delta_y = 0.0f;
+	}
+	if(i!=0)
+		car_rot_delta = car_delta = car_delta_y / car_delta_x;
+	else
+		car_rot_delta = 0.0f;
+	if (car_delta_x == 0.0f || car_delta_y == 0.0f) car_rot_delta = car_rot_delta;
+	if(car_delta_x==0.0f) car_delta = 1.0f;
+	if (leftbutton_pressed) {
+		delx = (float)(x - prevx), dely = -(float)(y - prevy);
+		prevx = x, prevy = y;
+
+		mat4_tmp = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f,0.0f,0.0f));
+
+		// 1. Judge direction
+		if (car_pos.x >= car_path_vertices[i] && car_pos.y < car_path_vertices[i+1])			direction = 1;	// the 1st quadrant(270~360 degree)
+		else if (car_pos.x >= car_path_vertices[i] && car_pos.y >= car_path_vertices[i+1])		direction = 2;	// the 2nd quadrant(0~89)
+		else if (car_pos.x < car_path_vertices[i] && car_pos.y >= car_path_vertices[i+1])		direction = 3;	// the 3rd quadrant(90~179)
+		else																					direction = 4;	// the 4th quadrant(180~269)
+		// 2. rotate
+		// 3. translate
+		switch(direction){
+		case 1:
+			if(car_delta_x!=0.0f)
+				car_pos.x -= MOV_X;
+			car_pos.y += MOV_Y * car_delta;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(car_pos.x, car_pos.y, 0.0f));
+			if(change_rot==true){
+				car_pos.rot = -atan(car_rot_delta)*TO_DEGREE;
+				change_rot=false;
+			}
+			if (car_path_vertices[i] >= car_pos.x && car_path_vertices[i+1] < car_pos.y) {
+				car_pos.x = car_path_vertices[i];
+				car_pos.y = car_path_vertices[i+1];
+				i=i+3; 
+				change_rot = true;
+				break;
+			}
+			break;
+		case 2:
+			if (car_delta_x != 0.0f)
+				car_pos.x -= MOV_X;
+			car_pos.y -= MOV_Y * car_delta;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(car_pos.x, car_pos.y, 0.0f));
+			if (change_rot == true) {
+				car_pos.rot = atan(car_rot_delta)*TO_DEGREE;
+				change_rot = false;
+			}
+			if (car_path_vertices[i] >= car_pos.x && car_path_vertices[i+1] >= car_pos.y) {
+				car_pos.x = car_path_vertices[i];
+				car_pos.y = car_path_vertices[i+1];
+				i=i+3; 
+				change_rot = true;
+				break;
+			}
+			break;
+		case 3:
+			if (car_delta_x != 0.0f)
+				car_pos.x += MOV_X;
+			car_pos.y -= MOV_Y * car_delta;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(car_pos.x, car_pos.y, 0.0f));
+			if (change_rot == true) {
+				car_pos.rot = 180.0f - atan(car_rot_delta)*TO_DEGREE;
+				change_rot = false;
+			}
+			if (car_path_vertices[i] < car_pos.x && car_path_vertices[i+1] >= car_pos.y) {
+				car_pos.x = car_path_vertices[i];
+				car_pos.y = car_path_vertices[i+1];
+				i=i+3; 
+				change_rot = true;
+				break;
+			}
+			break;
+		case 4:
+			if (car_delta_x != 0.0f)
+				car_pos.x += MOV_X;
+			car_pos.y += MOV_Y * car_delta;
+			mat4_tmp = glm::translate(mat4_tmp, glm::vec3(car_pos.x, car_pos.y, 0.0f));
+			if (change_rot == true) {
+				car_pos.rot = - 180.0f + atan(car_rot_delta)*TO_DEGREE;
+				change_rot = false;
+			}
+			if (car_path_vertices[i] < car_pos.x && car_path_vertices[i+1] < car_pos.y) {
+				car_pos.x = car_path_vertices[i];
+				car_pos.y = car_path_vertices[i+1];
+				i=i+3;
+				change_rot = true;
+				break;
+			}
+			break;
+		}
+		
+		car_pos.dist += abs(dely) * CAM_ROT_SENSITIVITY;
+		if (dely != 0.0f)	car_pos.wheel_rot = car_pos.dist * 180 / pi_rad;	// 바퀴 회전각 = 이동거리*180/(PI*radius)
+
+		//printf("rot = %f\n",car_pos.rot);
+		//printf("i = %d\tdirection = %d\trot = %f\n", i, direction, car_pos.rot);
+		//printf("car_pos.x = %f\t car_pos.y = %f\t car_pos.z = %f\n", car_pos.x, car_pos.y, car_pos.z);
+		//printf("prev_x = %f\tprev_y = %f\n", car_path_vertices[i - 3], car_path_vertices[i +1- 3]);
+		//printf("car_rot_delta = %f\n",car_rot_delta);
+		//printf("deltay = %f\n\n", dely);
+		printf("rot = %f\n", car_pos.rot);
+		printf("prev_rot = %f\n", prev_rot);
+		printf("del_rot = %f\n\n", del_rot);
+		//원점으로 가서 회전 및 이동 후 다시 돌아온다.
+		del_rot = car_pos.rot - prev_rot;
+		mat4_tmp = glm::rotate(mat4_tmp, del_rot * TO_RADIAN, camera[8].vup);
+		mat4_tmp = glm::translate(mat4_tmp, glm::vec3(-camera[8].prp.x,-camera[8].prp.y, 0.0f));//-camera[8].prp);
+		prev_rot = car_pos.rot;
+
+		// camera 업데이트
+		camera[8].prp = glm::vec3(mat4_tmp*glm::vec4(camera[8].prp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[8].vrp = glm::vec3(mat4_tmp*glm::vec4(camera[8].vrp, 1.0f));	// affine transformation of point (x,y,z,1)
+		camera[8].vup = glm::vec3(mat4_tmp*glm::vec4(camera[8].vup, 0.0f));	// affine transformation of vector(x,y,z,0)
+
+		if (i >= 3 * car_path_n_vertices) {	// back to initial position
+			i = 0;
+			car_pos.x = car_path_vertices[i];
+			car_pos.y = car_path_vertices[i + 1];
+			car_pos.rot = 0.0f;
+			
+			camera[8].prp = glm::vec3(car_pos.x - 3.0f, car_pos.y + 0.5f, car_pos.z + 7.0f);		// 카메라 위치
+			camera[8].vrp = glm::vec3(car_pos.x - 3.0f - 10.0f, car_pos.y + 0.5f, car_pos.z + 7.0f);		// 바라보는 곳
+			camera[8].vup = glm::vec3(0.0f, 0.0f, 1.0f);
+			prev_rot = 0.0f;
+			del_rot = 0.0;
+			
+		}
+
+		ViewMatrix[8] = glm::lookAt(camera[8].prp, camera[8].vrp, camera[8].vup);
+		ViewProjectionMatrix[8] = ProjectionMatrix[8] * ViewMatrix[8];
+		glutPostRedisplay();
+	}
+}
+
 void motion_car(int x, int y){
 	glm::mat4 mat4_tmp;
 	glm::vec3 vec3_tmp;
@@ -1010,8 +1097,8 @@ void prepare_shader_program(void) {
 
 void initialize_camera(void) {
 	// initialize the 8th camera - driver_cam
-	camera[8].prp = glm::vec3(car_pos.x-3.0f, car_pos.y+0.5f, car_pos.z+2.5f);		// 카메라 위치
-	camera[8].vrp = glm::vec3(car_pos.x-3.0f, car_pos.y+0.5f - 50.0f, car_pos.z+2.5f);		// 바라보는 곳
+	camera[8].prp = glm::vec3(car_pos.x-3.0f, car_pos.y+0.5f, car_pos.z+7.0f);		// 카메라 위치
+	camera[8].vrp = glm::vec3(car_pos.x-3.0f - 50.0f, car_pos.y+0.5f, car_pos.z+7.0f);		// 바라보는 곳
 	camera[8].vup = glm::vec3(0.0f, 0.0f, 1.0f);
 
 	glm::vec3 uaxis_driver, vaxis_driver, naxis_driver;
@@ -1205,6 +1292,7 @@ void prepare_scene(void) {
 	prepare_geom_obj(GEOM_OBJ_ID_CAR_WHEEL, car_wheel, GEOM_OBJ_TYPE_V);
 	prepare_geom_obj(GEOM_OBJ_ID_CAR_NUT, car_nut, GEOM_OBJ_TYPE_V);
 	prepare_path();
+	prepare_car_path();
 }
 
 void initialize_renderer(void) {
